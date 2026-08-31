@@ -358,8 +358,8 @@ const page = () => {
                       className="flex items-center justify-between p-3"
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="h-4 w-4 rounded bg-green-500 flex-shrink-0" />
-                        <span className="text-sm text-[#5E6C84] flex-shrink-0">
+                        <div className="h-4 w-4 rounded bg-green-500 shrink-0" />
+                        <span className="text-sm text-[#5E6C84] shrink-0">
                           {issue.key}
                         </span>
                         <span className="truncate">{issue.title}</span>
@@ -557,8 +557,8 @@ const BacklogItem = ({
         className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
         onClick={onClick}
       >
-        <div className="h-4 w-4 rounded bg-blue-500 flex-shrink-0" />
-        <span className="text-sm text-[#5E6C84] flex-shrink-0">
+        <div className="h-4 w-4 rounded bg-blue-500 shrink-0" />
+        <span className="text-sm text-[#5E6C84] shrink-0">
           {issue.key}
         </span>
         <span className="truncate">{issue.title}</span>

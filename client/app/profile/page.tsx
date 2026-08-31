@@ -421,7 +421,7 @@ const page = () => {
                   checked={emailNotificationsEnabled}
                   disabled={isSavingPrefs}
                   onChange={(e) => handleTogglePrefs(e.target.checked)}
-                  className="h-5 w-5 flex-shrink-0"
+                  className="h-5 w-5 shrink-0"
                 />
               </label>
               {prefsMessage && (
@@ -441,7 +441,7 @@ const page = () => {
             <CardContent>
               {emailChangeError && (
                 <div className="mb-4 flex gap-2 rounded-md bg-red-50 p-3 text-sm text-red-700">
-                  <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                  <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
                   <span>{emailChangeError}</span>
                 </div>
               )}
@@ -554,7 +554,7 @@ const page = () => {
                 <form onSubmit={handleConfirmOtp} className="space-y-4">
                   {otpError && (
                     <div className="flex gap-2 rounded-md bg-red-50 p-3 text-sm text-red-700">
-                      <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                      <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
                       <span>{otpError}</span>
                     </div>
                   )}
@@ -609,7 +609,7 @@ const page = () => {
               <form onSubmit={handleChangePassword} className="space-y-4">
                 {passwordError && (
                   <div className="flex gap-2 rounded-md bg-red-50 p-3 text-sm text-red-700">
-                    <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                    <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
                     <span>{passwordError}</span>
                   </div>
                 )}

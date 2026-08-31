@@ -116,7 +116,7 @@ const Sidebar = () => {
               </span>
               <ProjectPresence />
               {selectedProject?.ownerId === user?.id && (
-                <span className="text-[10px] font-bold text-[#0052CC] bg-[#DEEBFF] px-1.5 py-0.5 rounded flex-shrink-0">
+                <span className="text-[10px] font-bold text-[#0052CC] bg-[#DEEBFF] px-1.5 py-0.5 rounded shrink-0">
                   PM
                 </span>
               )}
@@ -139,7 +139,7 @@ const Sidebar = () => {
                     <div className="h-3 w-3 rounded-full bg-blue-500" />
                     <span className="flex-1 truncate">{proj.name}</span>
                     {proj.ownerId === user?.id && (
-                      <span className="text-[10px] font-bold text-[#0052CC] bg-[#DEEBFF] px-1.5 py-0.5 rounded flex-shrink-0">
+                      <span className="text-[10px] font-bold text-[#0052CC] bg-[#DEEBFF] px-1.5 py-0.5 rounded shrink-0">
                         PM
                       </span>
                     )}

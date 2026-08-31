@@ -218,7 +218,7 @@ const TimeLogModal = ({
                         )}
                       </div>
                       {canModifyLogs && (
-                        <div className="flex gap-1 flex-shrink-0">
+                        <div className="flex gap-1 shrink-0">
                           <Button
                             variant="ghost"
                             size="sm"

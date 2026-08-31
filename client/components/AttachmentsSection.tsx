@@ -51,7 +51,7 @@ const AttachmentRow = ({ attachment, canDelete, onDelete }: any) => {
   return (
     <div className="flex items-center justify-between rounded-md border border-[#DFE1E6] p-2">
       <div className="flex items-center gap-2 min-w-0">
-        <Paperclip className="h-4 w-4 text-[#5E6C84] flex-shrink-0" />
+        <Paperclip className="h-4 w-4 text-[#5E6C84] shrink-0" />
         <div className="min-w-0">
           <button
             onClick={handleDownload}
@@ -66,7 +66,7 @@ const AttachmentRow = ({ attachment, canDelete, onDelete }: any) => {
           </p>
         </div>
       </div>
-      <div className="flex items-center gap-1 flex-shrink-0">
+      <div className="flex items-center gap-1 shrink-0">
         <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleDownload}>
           <Download className="h-3.5 w-3.5" />
         </Button>

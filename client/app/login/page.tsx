@@ -193,13 +193,13 @@ const page = () => {
           <CardContent>
             {error && (
               <div className="mb-4 flex gap-3 rounded-md bg-red-50 p-3 text-sm text-red-700">
-                <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
                 <span>{error}</span>
               </div>
             )}
             {info && (
               <div className="mb-4 flex gap-3 rounded-md bg-blue-50 p-3 text-sm text-blue-700">
-                <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
                 <span>{info}</span>
               </div>
             )}

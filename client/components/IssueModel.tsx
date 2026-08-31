@@ -3,7 +3,15 @@
 import React, { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Button } from "./ui/button";
-import { Trash2, AlertCircle, Plus, X, Link2, Clock, Paperclip } from "lucide-react";
+import {
+  Trash2,
+  AlertCircle,
+  Plus,
+  X,
+  Link2,
+  Clock,
+  Paperclip,
+} from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Textarea } from "./ui/textarea";
 import axiosInstance from "@/lib/Axiosinstance";
@@ -38,7 +46,9 @@ const CommentRow = ({ comment }: any) => {
       <div className="flex items-center gap-2 mb-1">
         <Avatar className="h-5 w-5">
           <AvatarImage src={author?.avatar} />
-          <AvatarFallback className="text-[10px]">{author?.name?.[0] || "?"}</AvatarFallback>
+          <AvatarFallback className="text-[10px]">
+            {author?.name?.[0] || "?"}
+          </AvatarFallback>
         </Avatar>
         <span className="text-xs font-semibold text-[#172B4D]">
           {author?.name || "Unknown"}
@@ -90,7 +100,9 @@ const IssueModel = ({ issue, isOpen, onClose }: any) => {
   // Time tracking — handled in a dedicated TimeLogModal, this just shows
   // a running total and buttons to open it.
   const [isTimeLogOpen, setIsTimeLogOpen] = useState(false);
-  const [timeLogInitialMode, setTimeLogInitialMode] = useState<"list" | "form">("list");
+  const [timeLogInitialMode, setTimeLogInitialMode] = useState<"list" | "form">(
+    "list",
+  );
   const [totalLoggedHours, setTotalLoggedHours] = useState(0);
 
   const isSubtask = !!localIssue?.parentId;
@@ -107,7 +119,9 @@ const IssueModel = ({ issue, isOpen, onClose }: any) => {
     }
     const fetchAssignee = async () => {
       try {
-        const res = await axiosInstance.get(`/api/users/${localIssue.assigneeId}`);
+        const res = await axiosInstance.get(
+          `/api/users/${localIssue.assigneeId}`,
+        );
         setAssignee(res.data);
       } catch (err) {
         console.error("Failed to load assignee", err);
@@ -120,7 +134,9 @@ const IssueModel = ({ issue, isOpen, onClose }: any) => {
     if (!isOpen || !selectedProject?.id) return;
     const fetchMembers = async () => {
       try {
-        const res = await axiosInstance.get(`/api/projects/${selectedProject.id}`);
+        const res = await axiosInstance.get(
+          `/api/projects/${selectedProject.id}`,
+        );
         setTeamMembers(res.data.members || []);
       } catch (err) {
         console.error("Failed to load team members", err);
@@ -132,7 +148,9 @@ const IssueModel = ({ issue, isOpen, onClose }: any) => {
   const fetchSubtasks = async () => {
     if (!localIssue?.id) return;
     try {
-      const res = await axiosInstance.get(`/api/issues/${localIssue.id}/subtasks`);
+      const res = await axiosInstance.get(
+        `/api/issues/${localIssue.id}/subtasks`,
+      );
       setSubtasks(res.data);
     } catch (err) {
       console.error("Failed to load subtasks", err);
@@ -148,7 +166,9 @@ const IssueModel = ({ issue, isOpen, onClose }: any) => {
     if (!isOpen || !selectedProject?.id) return;
     const fetchProjectIssues = async () => {
       try {
-        const res = await axiosInstance.get(`/api/issues/project/${selectedProject.id}`);
+        const res = await axiosInstance.get(
+          `/api/issues/project/${selectedProject.id}`,
+        );
         setProjectIssues(res.data);
       } catch (err) {
         console.error("Failed to load project issues", err);
@@ -161,7 +181,9 @@ const IssueModel = ({ issue, isOpen, onClose }: any) => {
     if (!isOpen || !localIssue?.id) return;
     const fetchTotal = async () => {
       try {
-        const res = await axiosInstance.get(`/api/worklogs/issue/${localIssue.id}/total`);
+        const res = await axiosInstance.get(
+          `/api/worklogs/issue/${localIssue.id}/total`,
+        );
         setTotalLoggedHours(res.data.totalHours);
       } catch (err) {
         console.error("Failed to load logged hours", err);
@@ -170,7 +192,9 @@ const IssueModel = ({ issue, isOpen, onClose }: any) => {
     fetchTotal();
   }, [isOpen, localIssue?.id, isTimeLogOpen]);
 
-  const issueTitleById = new Map(projectIssues.map((i: any) => [i.id, i.title]));
+  const issueTitleById = new Map(
+    projectIssues.map((i: any) => [i.id, i.title]),
+  );
 
   const updateField = async (field: string, value: string) => {
     if (!localIssue) return;
@@ -203,7 +227,9 @@ const IssueModel = ({ issue, isOpen, onClose }: any) => {
     } catch (err: any) {
       console.warn(`Failed to update ${field}`, err);
       setLocalIssue(previous);
-      setErrorMessage(err.response?.data?.message || `Failed to update ${field}`);
+      setErrorMessage(
+        err.response?.data?.message || `Failed to update ${field}`,
+      );
     } finally {
       setLoading(false);
     }
@@ -214,9 +240,13 @@ const IssueModel = ({ issue, isOpen, onClose }: any) => {
 
     try {
       setLoading(true);
-            const updatedComments = [
+      const updatedComments = [
         ...(localIssue.comments || []),
-        { authorId: user.id, text: commentText, createdAt: new Date().toISOString() },
+        {
+          authorId: user.id,
+          text: commentText,
+          createdAt: new Date().toISOString(),
+        },
       ];
 
       const res = await axiosInstance.put(`/api/issues/${localIssue.id}`, {
@@ -247,9 +277,10 @@ const IssueModel = ({ issue, isOpen, onClose }: any) => {
 
   const handleDelete = async () => {
     if (!localIssue) return;
-    const warning = subtasks.length > 0
-      ? `Delete "${localIssue.title}"? This will also delete its ${subtasks.length} subtask(s). This can't be undone.`
-      : `Delete "${localIssue.title}"? This can't be undone.`;
+    const warning =
+      subtasks.length > 0
+        ? `Delete "${localIssue.title}"? This will also delete its ${subtasks.length} subtask(s). This can't be undone.`
+        : `Delete "${localIssue.title}"? This can't be undone.`;
     if (!confirm(warning)) return;
 
     try {
@@ -373,7 +404,7 @@ const IssueModel = ({ issue, isOpen, onClose }: any) => {
             <div className="flex-1 min-w-0 p-8 bg-[#FAFBFC]">
               {errorMessage && (
                 <div className="mb-4 flex gap-2 rounded-md bg-red-50 p-3 text-sm text-red-700">
-                  <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                  <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
                   <span>{errorMessage}</span>
                 </div>
               )}
@@ -383,7 +414,7 @@ const IssueModel = ({ issue, isOpen, onClose }: any) => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-red-500 hover:bg-red-50 hover:text-red-600 flex-shrink-0"
+                  className="text-red-500 hover:bg-red-50 hover:text-red-600 shrink-0"
                   onClick={handleDelete}
                 >
                   <Trash2 className="h-4 w-4 mr-1" />
@@ -415,7 +446,9 @@ const IssueModel = ({ issue, isOpen, onClose }: any) => {
                         />
                         <span
                           className={`flex-1 text-sm ${
-                            sub.status === "DONE" ? "line-through text-[#6B778C]" : ""
+                            sub.status === "DONE"
+                              ? "line-through text-[#6B778C]"
+                              : ""
                           }`}
                         >
                           {sub.key ? `${sub.key} · ` : ""}
@@ -446,9 +479,15 @@ const IssueModel = ({ issue, isOpen, onClose }: any) => {
                         placeholder="Subtask title"
                         value={newSubtaskTitle}
                         onChange={(e) => setNewSubtaskTitle(e.target.value)}
-                        onBlur={() => !newSubtaskTitle && setIsAddingSubtask(false)}
+                        onBlur={() =>
+                          !newSubtaskTitle && setIsAddingSubtask(false)
+                        }
                       />
-                      <Button type="submit" size="sm" className="bg-[#0052CC] text-white">
+                      <Button
+                        type="submit"
+                        size="sm"
+                        className="bg-[#0052CC] text-white"
+                      >
                         Add
                       </Button>
                     </form>
@@ -464,10 +503,15 @@ const IssueModel = ({ issue, isOpen, onClose }: any) => {
                 </Section>
               )}
 
-              <Section title="Depends on" icon={<Link2 className="h-3.5 w-3.5" />}>
+              <Section
+                title="Depends on"
+                icon={<Link2 className="h-3.5 w-3.5" />}
+              >
                 <div className="space-y-2 mb-2">
                   {(localIssue.dependsOn || []).length === 0 ? (
-                    <p className="text-sm text-[#6B778C] italic">No dependencies</p>
+                    <p className="text-sm text-[#6B778C] italic">
+                      No dependencies
+                    </p>
                   ) : (
                     (localIssue.dependsOn || []).map((depId: string) => (
                       <div
@@ -496,7 +540,8 @@ const IssueModel = ({ issue, isOpen, onClose }: any) => {
                     <option value="">Select a task…</option>
                     {availableDependencyOptions.map((i: any) => (
                       <option key={i.id} value={i.id}>
-                        {i.key ? `${i.key} · ` : ""}{i.title}
+                        {i.key ? `${i.key} · ` : ""}
+                        {i.title}
                       </option>
                     ))}
                   </select>
@@ -511,17 +556,23 @@ const IssueModel = ({ issue, isOpen, onClose }: any) => {
                 </div>
               </Section>
 
-                            <Section title="Attachments" icon={<Paperclip className="h-3.5 w-3.5" />}>
+              <Section
+                title="Attachments"
+                icon={<Paperclip className="h-3.5 w-3.5" />}
+              >
                 <AttachmentsSection issue={localIssue} />
               </Section>
 
-              <Section title="Time Tracking" icon={<Clock className="h-3.5 w-3.5" />}>
+              <Section
+                title="Time Tracking"
+                icon={<Clock className="h-3.5 w-3.5" />}
+              >
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-[#172B4D]">
                     {totalLoggedHours}h logged
                   </span>
                   <div className="flex gap-2">
-                                        <Button
+                    <Button
                       size="sm"
                       variant="outline"
                       onClick={() => {
@@ -549,17 +600,21 @@ const IssueModel = ({ issue, isOpen, onClose }: any) => {
               </Section>
 
               <Section title={`Comments (${localIssue.comments?.length || 0})`}>
-                              <div className="space-y-4 mb-4">
-                {localIssue.comments?.length > 0 ? (
-                  <div className="space-y-3">
-                    {localIssue.comments.map((comment: any, index: number) => (
-                      <CommentRow key={index} comment={comment} />
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-[#6B778C] italic">No comments yet</p>
-                )}
-              </div>
+                <div className="space-y-4 mb-4">
+                  {localIssue.comments?.length > 0 ? (
+                    <div className="space-y-3">
+                      {localIssue.comments.map(
+                        (comment: any, index: number) => (
+                          <CommentRow key={index} comment={comment} />
+                        ),
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-[#6B778C] italic">
+                      No comments yet
+                    </p>
+                  )}
+                </div>
 
                 <div className="flex gap-3">
                   <Avatar className="h-8 w-8">
@@ -588,7 +643,7 @@ const IssueModel = ({ issue, isOpen, onClose }: any) => {
             </div>
 
             {/* Sidebar */}
-            <div className="w-full md:w-80 flex-shrink-0 p-6 border-l bg-white">
+            <div className="w-full md:w-80 shrink-0 p-6 border-l bg-white">
               <div className="space-y-5">
                 <div>
                   <h3 className="text-xs font-bold uppercase mb-1">Status</h3>
@@ -635,11 +690,17 @@ const IssueModel = ({ issue, isOpen, onClose }: any) => {
 
                 <div>
                   <h3 className="text-xs font-bold uppercase mb-1">Due Date</h3>
-                                    <input
+                  <input
                     type="datetime-local"
-                    value={localIssue.dueDate ? localIssue.dueDate.slice(0, 16) : ""}
+                    value={
+                      localIssue.dueDate ? localIssue.dueDate.slice(0, 16) : ""
+                    }
                     min={new Date().toISOString().slice(0, 16)}
-                    max={new Date(new Date().setFullYear(new Date().getFullYear() + 5)).toISOString().slice(0, 16)}
+                    max={new Date(
+                      new Date().setFullYear(new Date().getFullYear() + 5),
+                    )
+                      .toISOString()
+                      .slice(0, 16)}
                     disabled={loading}
                     onChange={(e) => updateField("dueDate", e.target.value)}
                     className="w-full rounded border border-[#DFE1E6] p-2 text-sm"
@@ -652,7 +713,10 @@ const IssueModel = ({ issue, isOpen, onClose }: any) => {
                     value={localIssue.assigneeId || "unassigned"}
                     disabled={loading}
                     onValueChange={(value) =>
-                      updateField("assigneeId", value === "unassigned" ? "" : value)
+                      updateField(
+                        "assigneeId",
+                        value === "unassigned" ? "" : value,
+                      )
                     }
                   >
                     <SelectTrigger>
@@ -674,7 +738,7 @@ const IssueModel = ({ issue, isOpen, onClose }: any) => {
         )}
       </DialogContent>
 
-            <TimeLogModal
+      <TimeLogModal
         isOpen={isTimeLogOpen}
         onClose={() => setIsTimeLogOpen(false)}
         issue={localIssue}

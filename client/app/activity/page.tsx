@@ -81,7 +81,7 @@ const page = () => {
             {entries.map((entry) => (
               <div key={entry.id} className="flex items-start gap-3 p-3">
                 <span
-                  className={`text-xs px-2 py-0.5 rounded font-semibold flex-shrink-0 ${
+                  className={`text-xs px-2 py-0.5 rounded font-semibold shrink-0 ${
                     actionColors[entry.action] || "bg-gray-100 text-gray-700"
                   }`}
                 >

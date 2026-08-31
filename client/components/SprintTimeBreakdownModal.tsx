@@ -74,7 +74,7 @@ const SprintTimeBreakdownModal = ({
                         <span className="ml-2 text-xs text-green-700">(Done)</span>
                       )}
                     </div>
-                    <span className="font-semibold flex-shrink-0">
+                    <span className="font-semibold shrink-0">
                       {entry.totalHours}h
                     </span>
                   </div>
