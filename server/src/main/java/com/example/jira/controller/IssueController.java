@@ -166,9 +166,22 @@ public class IssueController {
                     .orElseThrow(() -> new RuntimeException("Project not found"));
             boolean isAssignee = actorUserId.equals(issue.getAssigneeId());
             boolean isProjectManager = actorUserId.equals(statusChangeProject.getOwnerId());
-            if (!isAssignee && !isProjectManager) {
+
+            // Subtasks have no real way to be individually assigned right
+            // now, so also allow the PARENT task's assignee to manage them —
+            // otherwise an unassigned subtask could only ever be moved by
+            // the PM, even by the person actually responsible for the work.
+            boolean isParentAssignee = false;
+            if (issue.getParentId() != null) {
+                Issue parentForPermission = issueRepository.findById(new ObjectId(issue.getParentId())).orElse(null);
+                if (parentForPermission != null) {
+                    isParentAssignee = actorUserId.equals(parentForPermission.getAssigneeId());
+                }
+            }
+
+            if (!isAssignee && !isProjectManager && !isParentAssignee) {
                 throw new RuntimeException(
-                        "Access denied: only the assignee or project manager can move this issue");
+                        "Access denied: only the assignee, the parent task's assignee, or project manager can move this issue");
             }
         }
 
@@ -410,14 +423,33 @@ public class IssueController {
     // =========================
     // DELETE
     // =========================
-    @DeleteMapping("/{id}")
+        @DeleteMapping("/{id}")
     public void deleteIssue(@PathVariable String id, Authentication authentication) {
         Issue issue = issueRepository.findById(new ObjectId(id))
                 .orElseThrow(() -> new RuntimeException("Issue not found"));
         accessControlService.requireProjectAccess(issue.getProjectId(), authentication);
         String actorUserId = accessControlService.currentUserId(authentication);
 
-                List<Issue> subtasks = issueRepository.findByParentId(id);
+        // Deleting a SUBTASK specifically is restricted to its own assignee,
+        // its parent's assignee, or the PM — top-level issue deletion stays
+        // open to any project member, unchanged.
+        if (issue.getParentId() != null) {
+            Project project = projectrepository.findById(new ObjectId(issue.getProjectId()))
+                    .orElseThrow(() -> new RuntimeException("Project not found"));
+            boolean isAssignee = actorUserId.equals(issue.getAssigneeId());
+            boolean isProjectManager = actorUserId.equals(project.getOwnerId());
+            boolean isParentAssignee = false;
+            Issue parent = issueRepository.findById(new ObjectId(issue.getParentId())).orElse(null);
+            if (parent != null) {
+                isParentAssignee = actorUserId.equals(parent.getAssigneeId());
+            }
+            if (!isAssignee && !isProjectManager && !isParentAssignee) {
+                throw new RuntimeException(
+                        "Access denied: only the assignee, the parent task's assignee, or project manager can delete this subtask");
+            }
+        }
+
+        List<Issue> subtasks = issueRepository.findByParentId(id);
         List<String> allDeletedIssueIds = new ArrayList<>(subtasks.stream().map(Issue::getId).toList());
         allDeletedIssueIds.add(id);
 
