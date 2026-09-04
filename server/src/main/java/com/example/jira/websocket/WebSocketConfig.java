@@ -8,8 +8,10 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 
 @Configuration
 @EnableWebSocketMessageBroker
-public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
+public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+@org.springframework.beans.factory.annotation.Value("${app.frontend-url:http://localhost:3000}")
+    private String allowedOrigin;
     private final JwtHandshakeInterceptor jwtHandshakeInterceptor;
 
     public WebSocketConfig(JwtHandshakeInterceptor jwtHandshakeInterceptor) {
@@ -19,7 +21,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setAllowedOrigins("http://localhost:3000")
+                .setAllowedOrigins(allowedOrigin)
                 .addInterceptors(jwtHandshakeInterceptor)
                 .setHandshakeHandler(new UserHandshakeHandler())
                 .withSockJS();
