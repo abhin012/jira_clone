@@ -14,6 +14,7 @@ type User = {
   group?: string;
   phone?: string;
   createdAt?: any;
+  emailNotificationsEnabled?: boolean;
 };
 export type Project = {
   id: string;
