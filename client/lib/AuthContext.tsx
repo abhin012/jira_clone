@@ -105,6 +105,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     localStorage.setItem("lastActivity", Date.now().toString());
   }, []);
 
+  // Pick up profile changes written to localStorage by ANOTHER tab of this
+  // same origin — e.g. the /confirm-email page patching the stored email
+  // after the user opens their verification link in a new tab. The
+  // browser's `storage` event only fires in tabs OTHER than the one that
+  // made the write, which is exactly the case this closes: without it, a
+  // profile tab left open during the email-change flow would keep showing
+  // the old email until manually refreshed.
+  useEffect(() => {
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== "user" || !event.newValue) return;
+      try {
+        const updated = JSON.parse(event.newValue);
+        if (updated?.id === user?.id) {
+          setUser(updated);
+        }
+      } catch {
+        // ignore malformed storage payloads
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, [user?.id]);
+
   // Track activity and auto-logout after INACTIVITY_LIMIT_MS of silence.
   useEffect(() => {
     if (!user) return;

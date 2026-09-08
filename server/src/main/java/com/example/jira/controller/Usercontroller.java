@@ -361,9 +361,16 @@ public class Usercontroller {
                 .orElseThrow(() -> new RuntimeException("Invalid or expired verification link"));
 
         applyPendingEmailChange(user, null, token);
-        userRepository.save(user);
+        User saved = userRepository.save(user);
 
-        return Map.of("message", "Email updated successfully. Please log in again with your new email.");
+        // id + new email only — enough for the confirm-email page to patch
+        // a matching locally-stored session (see AuthContext.tsx) without
+        // exposing anything else to a caller who's only proven possession
+        // of the link, not an active login.
+        return Map.of(
+                "message", "Email updated successfully.",
+                "id", saved.getId(),
+                "email", saved.getEmail());
     }
 
     // Shared by both confirmation paths — exactly one of otp/linkToken is
