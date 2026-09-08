@@ -6,6 +6,10 @@ import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
 import { useAuth } from "@/lib/AuthContext";
 import axiosInstance from "@/lib/Axiosinstance";
+import {
+  toLocalDatetimeInputValue,
+  localDatetimeInputToIso,
+} from "@/lib/dateUtils";
 
 const CreateIssuemodel = ({ isOpen, onClose }: any) => {
   const { user, selectedProject, bumpIssuesVersion } = useAuth();
@@ -76,7 +80,7 @@ const CreateIssuemodel = ({ isOpen, onClose }: any) => {
         projectId: selectedProject.id,
         reporterId: user.id,
         assigneeId: formData.assigneeId || null,
-        dueDate: formData.dueDate || null,
+        dueDate: localDatetimeInputToIso(formData.dueDate),
         order: 0,
       });
 
@@ -166,10 +170,20 @@ const CreateIssuemodel = ({ isOpen, onClose }: any) => {
             <Input
               type="datetime-local"
               name="dueDate"
-              min={new Date().toISOString().slice(0, 16)}
-              max={new Date(new Date().setFullYear(new Date().getFullYear() + 5)).toISOString().slice(0, 16)}
+              min={toLocalDatetimeInputValue(new Date().toISOString())}
+              max={toLocalDatetimeInputValue(
+                new Date(
+                  new Date().setFullYear(new Date().getFullYear() + 5),
+                ).toISOString(),
+              )}
               className="h-10 border-[#DFE1E6] focus-visible:ring-[#0052CC]"
               value={formData.dueDate}
+              // Picker-only, matching the same field in the issue detail
+              // modal — see IssueModel.tsx for why (typing a naive local
+              // string in was what caused reminders to fire off by the
+              // user's UTC offset in the first place).
+              readOnly
+              onKeyDown={(e) => e.preventDefault()}
               onChange={handleChange}
             />
           </div>

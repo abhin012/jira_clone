@@ -59,7 +59,13 @@ public class Issue {
     // detect "someone else changed this since you last looked" conflicts.
     private long version = 0;
 
-        private java.time.LocalDateTime dueDate;
+        // Absolute instant (UTC), not a timezone-naive wall-clock value —
+    // the client converts using the browser's own timezone before
+    // sending it (see dateUtils.ts). Anything comparing this to "now"
+    // must use Instant.now(), never LocalDateTime.now(), or the
+    // comparison silently drifts by the server's own UTC offset from
+    // whatever timezone actually set the date.
+    private Instant dueDate;
 
     // Guarantees each due-date reminder tier fires exactly once per due
     // date, regardless of how many times the scheduled job runs — one flag
@@ -146,8 +152,8 @@ public class Issue {
     public long getVersion() { return version; }
     public void setVersion(long version) { this.version = version; }
 
-        public java.time.LocalDateTime getDueDate() { return dueDate; }
-    public void setDueDate(java.time.LocalDateTime dueDate) { this.dueDate = dueDate; }
+        public Instant getDueDate() { return dueDate; }
+    public void setDueDate(Instant dueDate) { this.dueDate = dueDate; }
 
     public boolean isReminder24hSent() { return reminder24hSent; }
     public void setReminder24hSent(boolean reminder24hSent) { this.reminder24hSent = reminder24hSent; }

@@ -26,6 +26,10 @@ import {
 } from "./ui/select";
 import TimeLogModal from "./TimeLogModal";
 import AttachmentsSection from "./AttachmentsSection";
+import {
+  toLocalDatetimeInputValue,
+  localDatetimeInputToIso,
+} from "@/lib/dateUtils";
 
 const typeIcons: Record<string, string> = {
   BUG: "🐛",
@@ -213,7 +217,7 @@ const IssueModel = ({ issue, isOpen, onClose }: any) => {
     projectIssues.map((i: any) => [i.id, i.title]),
   );
 
-  const updateField = async (field: string, value: string) => {
+  const updateField = async (field: string, value: string | null) => {
     if (!localIssue) return;
 
     const previous = localIssue;
@@ -721,17 +725,28 @@ const IssueModel = ({ issue, isOpen, onClose }: any) => {
                   <h3 className="text-xs font-bold uppercase mb-1">Due Date</h3>
                   <input
                     type="datetime-local"
-                    value={
-                      localIssue.dueDate ? localIssue.dueDate.slice(0, 16) : ""
-                    }
-                    min={new Date().toISOString().slice(0, 16)}
-                    max={new Date(
-                      new Date().setFullYear(new Date().getFullYear() + 5),
-                    )
-                      .toISOString()
-                      .slice(0, 16)}
+                    value={toLocalDatetimeInputValue(localIssue.dueDate)}
+                    min={toLocalDatetimeInputValue(new Date().toISOString())}
+                    max={toLocalDatetimeInputValue(
+                      new Date(
+                        new Date().setFullYear(new Date().getFullYear() + 5),
+                      ).toISOString(),
+                    )}
                     disabled={loading}
-                    onChange={(e) => updateField("dueDate", e.target.value)}
+                    // Picker-only: block free-typed keystrokes so the value
+                    // can only change via the calendar icon. readOnly stops
+                    // keyboard entry while still letting Chromium/Firefox
+                    // open the native picker on click; onKeyDown is a
+                    // second guard for browsers that don't honor readOnly
+                    // on this input type.
+                    readOnly
+                    onKeyDown={(e) => e.preventDefault()}
+                    onChange={(e) =>
+                      updateField(
+                        "dueDate",
+                        localDatetimeInputToIso(e.target.value),
+                      )
+                    }
                     className="w-full rounded border border-[#DFE1E6] p-2 text-sm"
                   />
                 </div>

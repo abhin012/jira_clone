@@ -26,5 +26,5 @@ public interface IssueRepository extends MongoRepository<Issue, ObjectId> {
     // time slice means a tier can't be silently skipped by the job running
     // a little late or missing a beat after a restart.
     List<Issue> findByDueDateLessThanEqualAndStatusNot(
-            java.time.LocalDateTime threshold, String status);
+            java.time.Instant threshold, String status);
 }

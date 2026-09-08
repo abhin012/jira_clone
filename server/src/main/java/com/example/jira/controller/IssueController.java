@@ -286,12 +286,13 @@ public class IssueController {
         return saved;
     }
 
-            private void validateDueDate(java.time.LocalDateTime dueDate) {
+            private void validateDueDate(java.time.Instant dueDate) {
         if (dueDate == null) return;
-        if (dueDate.isBefore(java.time.LocalDateTime.now())) {
+        java.time.Instant now = java.time.Instant.now();
+        if (dueDate.isBefore(now)) {
             throw new RuntimeException("Invalid: due date cannot be in the past");
         }
-        if (dueDate.isAfter(java.time.LocalDateTime.now().plusYears(5))) {
+        if (dueDate.isAfter(now.plus(5 * 365, java.time.temporal.ChronoUnit.DAYS))) {
             throw new RuntimeException("Invalid: due date cannot be more than 5 years out");
         }
     }
