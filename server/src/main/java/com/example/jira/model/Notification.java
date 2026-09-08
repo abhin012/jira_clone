@@ -37,7 +37,7 @@ public class Notification {
 
     public String getRelatedIssueId() { return relatedIssueId; }
     public void setRelatedIssueId(String relatedIssueId) { this.relatedIssueId = relatedIssueId; }
-    
+
     public boolean isRead() { return read; }
     public void setRead(boolean read) { this.read = read; }
 

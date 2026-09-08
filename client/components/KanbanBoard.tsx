@@ -39,7 +39,6 @@ const KanbanBoard = () => {
   const [selectedIssue, setSelectedIssue] = useState<any | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // ✅ FIX: stable mount flag for portal
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -51,9 +50,6 @@ const KanbanBoard = () => {
     useSensor(KeyboardSensor)
   );
 
-  /* =====================
-     Fetch issues
-  ===================== */
   const fetchIssues = async () => {
     if (!selectedProject?.id) return;
 
@@ -71,8 +67,6 @@ const KanbanBoard = () => {
     } catch (err: any) {
       console.error("Failed to load issues", err);
       if (err.response?.status === 403 || err.response?.status === 404) {
-        // Project is no longer accessible to this account — clear it
-        // instead of leaving the board stuck on a failed request.
         setSelectedProject(null);
       }
     } finally {
@@ -84,12 +78,6 @@ const KanbanBoard = () => {
     fetchIssues();
   }, [selectedProject?.id, issuesVersion]);
 
-  // Keep the open issue modal's `issue` prop pointing at current data as
-  // the board refetches (e.g. after a realtime event from someone else's
-  // comment/edit) — otherwise a modal left open across that refresh would
-  // keep rendering whatever snapshot it had when it was first clicked
-  // open, since IssueModel only re-seeds its own local state from a
-  // genuinely different `issue` object.
   useEffect(() => {
     if (!selectedIssue) return;
     const fresh = issues.find((i) => i.id === selectedIssue.id);
@@ -98,18 +86,13 @@ const KanbanBoard = () => {
     }
   }, [issues]);
 
-  /* =====================
-     Drag handlers
-  ===================== */
   const onDragStart = (event: DragStartEvent) => {
     const issue = issues.find((i) => i.id === event.active.id);
     setActiveIssue(issue || null);
   };
 
  const resolveColumnId = (overId: string): string | null => {
-    // Dropped directly on a column's empty area
     if (STATUS_COLUMNS.some((c) => c.id === overId)) return overId;
-    // Dropped on top of another card — use that card's current column
     const overIssue = issues.find((i) => i.id === overId);
     return overIssue ? overIssue.status : null;
   };
@@ -134,7 +117,6 @@ const KanbanBoard = () => {
     };
 
         try {
-      // Optimistic update
       setIssues((prev) =>
         prev.map((i) => (i.id === issueId ? updatedIssue : i))
       );
@@ -156,21 +138,14 @@ const KanbanBoard = () => {
         dueDate: updatedIssue.dueDate ?? null,
       });
 
-      // Replace the optimistic guess with the authoritative saved copy —
-      // specifically so its (now-incremented) version is correct for any
-      // immediate follow-up drag on the same card.
       setIssues((prev) =>
         prev.map((i) => (i.id === issueId ? res.data : i))
       );
     } catch (err: any) {
       console.warn("Failed to update issue", err);
       if (err.response?.status === 409) {
-        // Stale local copy (e.g. rapid repeated drags) — just resync
-        // quietly rather than interrupting with a dialog.
         fetchIssues();
       } else {
-        // Genuine rejection (e.g. blocked by a dependency) — undo the
-        // optimistic move, since the backend never actually applied it.
         setIssues((prev) => prev.map((i) => (i.id === issueId ? issue : i)));
         alert(err.response?.data?.message || "Failed to move issue");
       }
@@ -231,7 +206,7 @@ const KanbanBoard = () => {
         </div>
       )}
 
-      {/* Issue Modal */}
+      {}
       <IssueModel
         key={selectedIssue?.id}
         issue={selectedIssue}
@@ -239,7 +214,7 @@ const KanbanBoard = () => {
         onClose={() => setSelectedIssue(null)}
       />
 
-      {/* ✅ FIXED: stable DragOverlay portal */}
+      {}
       {isMounted &&
         !loading &&
         createPortal(

@@ -45,9 +45,6 @@ public class IssueController {
         this.fileStorageService = fileStorageService;
     }
 
-    // =========================
-    // CREATE (also handles subtasks when parentId is set)
-    // =========================
     @PostMapping
     public Issue createIssue(@RequestBody Issue issue, Authentication authentication) {
         Issue parent = null;
@@ -96,9 +93,6 @@ public class IssueController {
         return saved;
     }
 
-    // =========================
-    // GET BY PROJECT
-    // =========================
     @GetMapping("/project/{projectId}")
     public List<Issue> getIssuesByProject(@PathVariable String projectId, Authentication authentication) {
         accessControlService.requireProjectAccess(projectId, authentication);
@@ -115,9 +109,6 @@ public class IssueController {
         return topLevel;
     }
 
-    // =========================
-    // GET BY ID
-    // =========================
     @GetMapping("/{id}")
     public Issue getIssueById(@PathVariable String id, Authentication authentication) {
         Issue issue = issueRepository.findById(new ObjectId(id))
@@ -126,9 +117,6 @@ public class IssueController {
         return issue;
     }
 
-    // =========================
-    // GET SUBTASKS OF A PARENT
-    // =========================
     @GetMapping("/{id}/subtasks")
     public List<Issue> getSubtasks(@PathVariable String id, Authentication authentication) {
         Issue parent = issueRepository.findById(new ObjectId(id))
@@ -137,9 +125,6 @@ public class IssueController {
         return issueRepository.findByParentId(id);
     }
 
-    // =========================
-    // UPDATE
-    // =========================
     @PutMapping("/{id}")
     public Issue updateIssue(
             @PathVariable String id,
@@ -167,10 +152,6 @@ public class IssueController {
             boolean isAssignee = actorUserId.equals(issue.getAssigneeId());
             boolean isProjectManager = actorUserId.equals(statusChangeProject.getOwnerId());
 
-            // Subtasks have no real way to be individually assigned right
-            // now, so also allow the PARENT task's assignee to manage them —
-            // otherwise an unassigned subtask could only ever be moved by
-            // the PM, even by the person actually responsible for the work.
             boolean isParentAssignee = false;
             if (issue.getParentId() != null) {
                 Issue parentForPermission = issueRepository.findById(new ObjectId(issue.getParentId())).orElse(null);
@@ -234,9 +215,6 @@ public class IssueController {
         issue.setComments(updated.getComments());
         issue.setDueDate(updated.getDueDate());
         if (dueDateChanged) {
-            // A rescheduled due date should get its full 24h/10h/90m
-            // reminder sequence again, not just whichever tier happens to
-            // still be in front of it.
             issue.setReminder24hSent(false);
             issue.setReminder10hSent(false);
             issue.setReminder90mSent(false);
@@ -250,8 +228,6 @@ public class IssueController {
             clearCompletedDependencyFromDependents(saved);
         }
 
-        // Task assignment — only when it's a genuinely new assignee, and
-        // not when someone assigns the task to themselves.
         boolean assigneeChanged = !Objects.equals(previousAssigneeId, saved.getAssigneeId());
         if (assigneeChanged && saved.getAssigneeId() != null && !saved.getAssigneeId().equals(actorUserId)) {
             Notification assignNotification = new Notification();
@@ -262,8 +238,6 @@ public class IssueController {
             notificationPublisher.publish(assignNotification);
         }
 
-        // Status change — tell the assignee and reporter, skipping whichever
-        // of them is the actor themselves (no need to notify yourself).
         if (!targetStatus.equals(previousStatus)) {
             Set<String> statusRecipients = new HashSet<>();
             if (saved.getAssigneeId() != null) statusRecipients.add(saved.getAssigneeId());
@@ -315,15 +289,6 @@ public class IssueController {
         }
     }
 
-    // Once a task is Done, it can't block anything anymore — strip it out of
-    // the dependsOn list of every task that was waiting on it, immediately.
-    // Only the completed task is removed from THEIR list; the reverse edge
-    // (tasks that depend on the one we just completed) is untouched, and any
-    // OTHER still-open blockers those dependents have stay in place.
-    // actorUserId is intentionally left null on the realtime event below —
-    // this is a side effect of completing a different issue, not something
-    // the caller's own client already applied locally, so even the actor's
-    // own board needs to refetch to see the dependents' cards unblock.
     private void clearCompletedDependencyFromDependents(Issue completedIssue) {
         List<Issue> dependents = issueRepository.findByDependsOnContaining(completedIssue.getId());
         for (Issue dependent : dependents) {
@@ -338,9 +303,6 @@ public class IssueController {
         }
     }
 
-    // =========================
-    // ADD DEPENDENCY (with cycle detection)
-    // =========================
     @PutMapping("/{id}/dependencies/{dependsOnId}")
     public Issue addDependency(
             @PathVariable String id,
@@ -424,9 +386,6 @@ public class IssueController {
         return false;
     }
 
-    // =========================
-    // REMOVE DEPENDENCY
-    // =========================
     @DeleteMapping("/{id}/dependencies/{dependsOnId}")
     public Issue removeDependency(
             @PathVariable String id,
@@ -450,9 +409,6 @@ public class IssueController {
         return issue;
     }
 
-    // =========================
-    // DELETE
-    // =========================
         @DeleteMapping("/{id}")
     public void deleteIssue(@PathVariable String id, Authentication authentication) {
         Issue issue = issueRepository.findById(new ObjectId(id))
@@ -460,9 +416,6 @@ public class IssueController {
         accessControlService.requireProjectAccess(issue.getProjectId(), authentication);
         String actorUserId = accessControlService.currentUserId(authentication);
 
-        // Deleting a SUBTASK specifically is restricted to its own assignee,
-        // its parent's assignee, or the PM — top-level issue deletion stays
-        // open to any project member, unchanged.
         if (issue.getParentId() != null) {
             Project project = projectrepository.findById(new ObjectId(issue.getProjectId()))
                     .orElseThrow(() -> new RuntimeException("Project not found"));

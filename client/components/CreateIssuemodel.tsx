@@ -13,15 +13,6 @@ import {
 
 const CreateIssuemodel = ({ isOpen, onClose }: any) => {
   const { user, selectedProject, bumpIssuesVersion } = useAuth();
-  // const currentUser = {
-  //   id: "user-1",
-  //   name: "John Doe",
-  //   email: "john@example.com",
-  //   role: "ADMIN",
-  //   group: "Engineering",
-  //   avatar: "https://i.pravatar.cc/150?u=john",
-  //   createdAt: new Date().toISOString(),
-  // };
   const [isloading, setIsloading] = useState(false);
   const [error, setError] = useState("");
   const [teamMembers, setteamMembers] = useState([]);
@@ -100,26 +91,6 @@ const CreateIssuemodel = ({ isOpen, onClose }: any) => {
       setIsloading(false);
     }
   };
-  // const teamMembers = [
-  //   {
-  //     id: "user-1",
-  //     name: "John Doe",
-  //     email: "john@example.com",
-  //     role: "ADMIN",
-  //     group: "Engineering",
-  //     avatar: "https://i.pravatar.cc/150?u=john",
-  //     createdAt: new Date().toISOString(),
-  //   },
-  //   {
-  //     id: "user-2",
-  //     name: "Jane Smith",
-  //     email: "jane@example.com",
-  //     role: "MEMBER",
-  //     group: "Design",
-  //     avatar: "https://i.pravatar.cc/150?u=jane",
-  //     createdAt: new Date().toISOString(),
-  //   },
-  // ];
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl">
@@ -178,12 +149,10 @@ const CreateIssuemodel = ({ isOpen, onClose }: any) => {
               )}
               className="h-10 border-[#DFE1E6] focus-visible:ring-[#0052CC]"
               value={formData.dueDate}
-              // Picker-only, matching the same field in the issue detail
-              // modal — see IssueModel.tsx for why (typing a naive local
-              // string in was what caused reminders to fire off by the
-              // user's UTC offset in the first place).
-              readOnly
-              onKeyDown={(e) => e.preventDefault()}
+              onKeyDown={(e) => {
+                if (e.key === "Tab") return;
+                e.preventDefault();
+              }}
               onChange={handleChange}
             />
           </div>

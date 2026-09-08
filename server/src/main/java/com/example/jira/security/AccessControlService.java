@@ -22,9 +22,6 @@ public class AccessControlService {
         return authentication.getName();
     }
 
-    // Verifies the current user is the owner or a member of the given project.
-    // Throws (caught by GlobalExceptionHandler) if not — used to gate every
-    // project-scoped read/write across issues, sprints, and the project itself.
     public Project requireProjectAccess(String projectId, Authentication authentication) {
         String userId = currentUserId(authentication);
 
@@ -46,8 +43,6 @@ public class AccessControlService {
         return project;
     }
 
-    // Stricter check for destructive actions (e.g. deleting a project) —
-    // any member can view/edit, but only the owner can delete it outright.
     public Project requireProjectOwner(String projectId, Authentication authentication) {
         Project project = requireProjectAccess(projectId, authentication);
         String userId = currentUserId(authentication);

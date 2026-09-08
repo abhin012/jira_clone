@@ -18,27 +18,24 @@ import Link from "next/link";
 import React, { useRef, useState } from "react";
 
 const ALLOWED_AVATAR_TYPES = ["image/png", "image/jpeg", "image/gif", "image/webp"];
-const MAX_AVATAR_BYTES = 2 * 1024 * 1024; // 2MB
+const MAX_AVATAR_BYTES = 2 * 1024 * 1024;
 
 const page = () => {
   const { user, updateUser, logout, selectedProject } = useAuth();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Personal info
   const [name, setName] = useState(user?.name || "");
   const [phone, setPhone] = useState(user?.phone || "");
   const [group, setGroup] = useState(user?.group || "");
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
 
-  // Avatar (separate save flow from the rest of Personal Info)
   const [avatarPreview, setAvatarPreview] = useState(user?.avatar || "");
   const [avatarError, setAvatarError] = useState("");
   const [isSavingAvatar, setIsSavingAvatar] = useState(false);
   const [avatarSaveMessage, setAvatarSaveMessage] = useState("");
 
-  // Change email — two-step: request a code, then confirm it
   const [newEmail, setNewEmail] = useState("");
   const [emailPassword, setEmailPassword] = useState("");
   const [verificationMethod, setVerificationMethod] = useState<"OTP" | "LINK">("OTP");
@@ -53,7 +50,6 @@ const page = () => {
   const [isConfirmingOtp, setIsConfirmingOtp] = useState(false);
   const [otpError, setOtpError] = useState("");
 
-  // Change password
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
@@ -269,7 +265,7 @@ const page = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Profile Card */}
+        {}
         <Card className="lg:col-span-1 h-fit">
           <CardHeader>
             <CardTitle className="text-[#172B4D]">About You</CardTitle>
@@ -344,9 +340,9 @@ const page = () => {
           </CardContent>
         </Card>
 
-        {/* Settings */}
+        {}
         <div className="lg:col-span-2 space-y-6">
-          {/* Personal Information */}
+          {}
           <Card>
             <CardHeader>
               <CardTitle className="text-[#172B4D]">
@@ -405,7 +401,7 @@ const page = () => {
             </CardContent>
           </Card>
 
-                    {/* Notification Preferences */}
+                    {}
           <Card>
             <CardHeader>
               <CardTitle className="text-[#172B4D]">Notification Preferences</CardTitle>
@@ -430,7 +426,7 @@ const page = () => {
             </CardContent>
           </Card>
 
-          {/* Change Email */}
+          {}
           <Card>
             <CardHeader>
               <CardTitle className="text-[#172B4D]">Email Address</CardTitle>
@@ -597,7 +593,7 @@ const page = () => {
             </CardContent>
           </Card>
 
-          {/* Change Password */}
+          {}
           <Card>
             <CardHeader>
               <CardTitle className="text-[#172B4D]">Password</CardTitle>
@@ -667,7 +663,7 @@ const page = () => {
             </CardContent>
           </Card>
 
-          {/* Activity Information */}
+          {}
           <Card>
             <CardHeader>
               <CardTitle className="text-[#172B4D]">Activity</CardTitle>
@@ -687,7 +683,7 @@ const page = () => {
             </CardContent>
           </Card>
 
-          {/* Danger Zone */}
+          {}
           <Card className="border-red-200">
             <CardHeader>
               <CardTitle className="text-red-700 flex items-center gap-2">

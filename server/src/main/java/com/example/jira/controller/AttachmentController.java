@@ -43,9 +43,6 @@ public class AttachmentController {
         this.realtimeEventPublisher = realtimeEventPublisher;
     }
 
-    // =========================
-    // UPLOAD
-    // =========================
     @PostMapping("/issues/{issueId}/attachments")
     public Attachment upload(
             @PathVariable String issueId,
@@ -76,9 +73,6 @@ public class AttachmentController {
         return saved;
     }
 
-    // =========================
-    // LIST FOR AN ISSUE
-    // =========================
     @GetMapping("/issues/{issueId}/attachments")
     public List<Attachment> listForIssue(@PathVariable String issueId, Authentication authentication) {
         Issue issue = issueRepository.findById(new ObjectId(issueId))
@@ -87,9 +81,6 @@ public class AttachmentController {
         return attachmentRepository.findByIssueId(issueId);
     }
 
-    // =========================
-    // DOWNLOAD
-    // =========================
     @GetMapping("/attachments/{id}/download")
     public ResponseEntity<Resource> download(@PathVariable String id, Authentication authentication) {
         Attachment attachment = attachmentRepository.findById(new ObjectId(id))
@@ -106,9 +97,6 @@ public class AttachmentController {
                 .body(resource);
     }
 
-    // =========================
-    // DELETE (uploader or project manager only)
-    // =========================
     @DeleteMapping("/attachments/{id}")
     public void delete(@PathVariable String id, Authentication authentication) {
         Attachment attachment = attachmentRepository.findById(new ObjectId(id))

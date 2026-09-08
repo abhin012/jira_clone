@@ -92,16 +92,6 @@ const IssueModel = ({ issue, isOpen, onClose }: any) => {
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Adopt a newer `issue` prop while this same modal instance stays open —
-  // the parent board/backlog page re-passes a fresh object here whenever
-  // it refetches (e.g. a realtime event fired because a second person
-  // added a comment). Comparing `version` rather than just re-seeding on
-  // every prop change avoids clobbering this session's own in-flight
-  // optimistic update with a same-or-older copy of itself; every field
-  // this modal can edit (status/priority/dueDate via a select or date
-  // input, comments via saveComment) is committed to the server
-  // immediately on change, so there's never a case of unsaved free text
-  // sitting in localIssue that this could stomp on.
   useEffect(() => {
     if (!issue) return;
     setLocalIssue((prev: any) =>
@@ -109,17 +99,13 @@ const IssueModel = ({ issue, isOpen, onClose }: any) => {
     );
   }, [issue]);
 
-  // Subtasks
   const [subtasks, setSubtasks] = useState<any[]>([]);
   const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
   const [isAddingSubtask, setIsAddingSubtask] = useState(false);
 
-  // Dependencies
   const [projectIssues, setProjectIssues] = useState<any[]>([]);
   const [selectedDependencyId, setSelectedDependencyId] = useState("");
 
-  // Time tracking — handled in a dedicated TimeLogModal, this just shows
-  // a running total and buttons to open it.
   const [isTimeLogOpen, setIsTimeLogOpen] = useState(false);
   const [timeLogInitialMode, setTimeLogInitialMode] = useState<"list" | "form">(
     "list",
@@ -289,10 +275,6 @@ const IssueModel = ({ issue, isOpen, onClose }: any) => {
 
       setLocalIssue(res.data);
       setCommentText("");
-      // Without this, the board/backlog page's own issues array never
-      // learns about the new comment — so closing this modal and
-      // reopening the same issue (a fresh mount, seeded from that array)
-      // would show it with the comment missing again.
       bumpIssuesVersion();
     } catch (err) {
       console.error("Failed to save comment", err);
@@ -386,11 +368,6 @@ const IssueModel = ({ issue, isOpen, onClose }: any) => {
       );
       setLocalIssue(res.data);
       setSelectedDependencyId("");
-      // Without this, only the modal's own copy learns about the new
-      // dependency — the board's issues array (which is what re-seeds this
-      // modal's initial state on the next open, via the `issue` prop) stays
-      // stale, so closing and reopening the same issue would show it with
-      // no dependencies again.
       bumpIssuesVersion();
     } catch (err: any) {
       alert(err.response?.data?.message || "Failed to add dependency");
@@ -433,7 +410,7 @@ const IssueModel = ({ issue, isOpen, onClose }: any) => {
           </div>
         ) : (
           <div className="flex flex-col md:flex-row">
-            {/* Main */}
+            {}
             <div className="flex-1 min-w-0 p-8 bg-[#FAFBFC]">
               {errorMessage && (
                 <div className="mb-4 flex gap-2 rounded-md bg-red-50 p-3 text-sm text-red-700">
@@ -675,7 +652,7 @@ const IssueModel = ({ issue, isOpen, onClose }: any) => {
               </Section>
             </div>
 
-            {/* Sidebar */}
+            {}
             <div className="w-full md:w-80 shrink-0 p-6 border-l bg-white">
               <div className="space-y-5">
                 <div>
@@ -733,14 +710,10 @@ const IssueModel = ({ issue, isOpen, onClose }: any) => {
                       ).toISOString(),
                     )}
                     disabled={loading}
-                    // Picker-only: block free-typed keystrokes so the value
-                    // can only change via the calendar icon. readOnly stops
-                    // keyboard entry while still letting Chromium/Firefox
-                    // open the native picker on click; onKeyDown is a
-                    // second guard for browsers that don't honor readOnly
-                    // on this input type.
-                    readOnly
-                    onKeyDown={(e) => e.preventDefault()}
+                    onKeyDown={(e) => {
+                      if (e.key === "Tab") return;
+                      e.preventDefault();
+                    }}
                     onChange={(e) =>
                       updateField(
                         "dueDate",

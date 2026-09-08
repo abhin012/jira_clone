@@ -21,11 +21,9 @@ public class Healthcontoller {
     @GetMapping("/health")
     public String healthcheck() {
         try {
-            // ❌ OS env (may be null, that's OK)
             System.out.println("ENV SPRING_DATA_MONGODB_URI = [" +
                     System.getenv("SPRING_DATA_MONGODB_URI") + "]");
 
-            // ✅ Spring config (this is what MongoTemplate actually uses)
             System.out.println("SPRING mongo uri = [" + mongoUri + "]");
 
             mongoTemplate.getDb().runCommand(new Document("ping", 1));

@@ -21,9 +21,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(status).body(body);
     }
 
-    // Best-effort mapping of known messages to sensible HTTP status codes.
-    // Keeps existing controller code (which just throws RuntimeException) working
-    // without having to touch every controller right now.
     private HttpStatus resolveStatus(String message) {
         if (message == null) {
             return HttpStatus.INTERNAL_SERVER_ERROR;

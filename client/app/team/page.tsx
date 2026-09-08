@@ -74,7 +74,6 @@ const page = () => {
     try {
       setLoading(true);
 
-      // Check if this person already has an account.
       let existingUser = null;
       try {
         const lookupRes = await axiosInstance.get("/api/users/by-email", {
@@ -82,7 +81,6 @@ const page = () => {
         });
         existingUser = lookupRes.data;
       } catch {
-        // No account found — fall through to creating a new one.
       }
 
      if (existingUser) {
@@ -165,14 +163,14 @@ const page = () => {
     : teamMembers;
   return (
     <div className="p-8 h-full flex flex-col bg-[#F4F5F7] relative">
-      {/* Loader */}
+      {}
       {loading && (
         <div className="absolute inset-0 bg-white/70 flex items-center justify-center z-50">
           <p className="text-sm text-[#6B778C]">Updating team…</p>
         </div>
       )}
 
-      {/* Header */}
+      {}
       <header className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-[#172B4D]">Team Management</h1>
@@ -189,7 +187,7 @@ const page = () => {
         </Button>
       </header>
 
-      {/* Group Filter */}
+      {}
       <div className="mb-6 flex gap-2">
         <Button
           variant={selectedGroup === null ? "default" : "outline"}
@@ -210,7 +208,7 @@ const page = () => {
         ))}
       </div>
 
-      {/* Table */}
+      {}
       <div className="flex-1 rounded-lg border bg-white overflow-y-auto">
         <Table>
           <TableHeader className="bg-[#F4F5F7] sticky top-0">
@@ -285,7 +283,7 @@ const page = () => {
         </Table>
       </div>
 
-      {/* Add Member Modal */}
+      {}
       <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>

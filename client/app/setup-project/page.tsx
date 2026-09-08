@@ -24,24 +24,6 @@ const page = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const { user } = useAuth();
-  // const currentProject = {
-  //   id: "proj-1",
-  //   name: "Platform Services",
-  //   key: "PS",
-  //   ownerId: "user-1",
-  //   memberIds: ["user-1", "user-2"],
-  //   createdAt: new Date().toISOString(),
-  //   description: "Core platform infrastructure and services",
-  // };
-  // const currentUser = {
-  //   id: "user-1",
-  //   name: "John Doe",
-  //   email: "john@example.com",
-  //   role: "ADMIN",
-  //   group: "Engineering",
-  //   avatar: "https://i.pravatar.cc/150?u=john",
-  //   createdAt: new Date().toISOString(),
-  // };
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -59,7 +41,6 @@ const page = () => {
     setIsLoading(true);
 
     try {
-      // Validate inputs
       if (!formData.name.trim()) {
         setError("Project name is required");
         setIsLoading(false);
@@ -76,7 +57,6 @@ const page = () => {
         key: formData.key,
         ownerId: user?.id,
       });
-      // Redirect to board
       router.push("/");
     } catch (err) {
       setError("Failed to create project. Please try again.");

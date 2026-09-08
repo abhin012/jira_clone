@@ -20,9 +20,6 @@ public class PresenceController {
         this.accessControlService = accessControlService;
     }
 
-    // Reliable snapshot of who's currently active on a project — used right
-    // after subscribing, so a just-joined user isn't dependent on winning a
-    // timing race with the WebSocket broadcast to see who was already there.
     @GetMapping("/{projectId}/presence")
     public Set<String> getPresence(@PathVariable String projectId, Authentication authentication) {
         accessControlService.requireProjectAccess(projectId, authentication);

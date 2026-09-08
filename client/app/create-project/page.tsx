@@ -19,15 +19,6 @@ import { useAuth } from "@/lib/AuthContext";
 
 export default function Page() {
   const router = useRouter();
-  // const currentUser = {
-  //   id: "user-1",
-  //   name: "John Doe",
-  //   email: "john@example.com",
-  //   role: "ADMIN",
-  //   group: "Engineering",
-  //   avatar: "https://i.pravatar.cc/150?u=john",
-  //   createdAt: new Date().toISOString(),
-  // };
   const [projectData, setProjectData] = useState({ name: "", key: "" });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);

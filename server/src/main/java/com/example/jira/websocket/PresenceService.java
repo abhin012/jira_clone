@@ -13,11 +13,8 @@ public class PresenceService {
 
     private final SimpMessagingTemplate messagingTemplate;
 
-    // projectId -> set of userIds currently subscribed/viewing it
     private final Map<String, Set<String>> activeUsersByProject = new ConcurrentHashMap<>();
 
-    // sessionId -> (projectId, userId), so a disconnect can clean up correctly
-    // without the client needing to tell us which project it was viewing.
     private final Map<String, String[]> sessionInfo = new ConcurrentHashMap<>();
 
     public PresenceService(SimpMessagingTemplate messagingTemplate) {

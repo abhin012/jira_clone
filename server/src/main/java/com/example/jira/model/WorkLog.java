@@ -15,7 +15,7 @@ public class WorkLog {
 
     private String issueId;
     private String projectId;
-    private String userId; // who logged this work
+    private String userId;
     private LocalDate date;
     private double hours;
     private String description;

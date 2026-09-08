@@ -28,15 +28,8 @@ const NotificationBell = () => {
 
   useEffect(() => {
     if (!user) return;
-    // Fallback polling stays in place in case a push is ever missed (e.g.
-    // during a brief reconnect window) — the WebSocket push above makes
-    // the common case feel instant, this is just a safety net.
     const intervalId = setInterval(fetchNotifications, 10 * 1000);
 
-    // Browsers throttle timers in background tabs, so also refetch
-    // immediately whenever the tab becomes visible again — otherwise a
-    // notification created while you were on another tab won't show up
-    // until the throttled interval eventually catches up.
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
         fetchNotifications();

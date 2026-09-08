@@ -25,13 +25,8 @@ public class Issue {
     private String sprintId;
     private int order;
 
-    // Subtasks: a non-null parentId means this issue IS a subtask.
-    // Subtasks inherit projectId/sprintId from their parent and cannot
-    // diverge — enforced server-side on every update, not just creation.
     private String parentId;
 
-    // Dependencies: ids of other issues that must be DONE before this
-    // issue can move past TODO. Cycle-checked on every addition.
     private List<String> dependsOn;
 
         private List<Comment> comments;
@@ -54,31 +49,14 @@ public class Issue {
         public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
     }
 
-    // Manual optimistic-concurrency counter. Incremented on every successful
-    // update; a client must send back the version it last saw so we can
-    // detect "someone else changed this since you last looked" conflicts.
     private long version = 0;
 
-        // Absolute instant (UTC), not a timezone-naive wall-clock value —
-    // the client converts using the browser's own timezone before
-    // sending it (see dateUtils.ts). Anything comparing this to "now"
-    // must use Instant.now(), never LocalDateTime.now(), or the
-    // comparison silently drifts by the server's own UTC offset from
-    // whatever timezone actually set the date.
     private Instant dueDate;
 
-    // Guarantees each due-date reminder tier fires exactly once per due
-    // date, regardless of how many times the scheduled job runs — one flag
-    // per tier so the 24h/10h/90m-before reminders are independent of each
-    // other. Reset together whenever the due date itself changes (see
-    // IssueController) so a rescheduled task gets the full sequence again.
     private boolean reminder24hSent = false;
     private boolean reminder10hSent = false;
     private boolean reminder90mSent = false;
 
-    // Computed at read time only — never persisted. @Transient prevents
-    // Spring Data from writing these into the actual Mongo document on
-    // save(), which would otherwise silently corrupt stored data.
     @org.springframework.data.annotation.Transient
     private int subtaskCount = 0;
 

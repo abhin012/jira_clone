@@ -37,8 +37,6 @@ public class NotificationPublisher {
         maybeSendEmail(saved);
     }
 
-    // Saves + pushes only if no matching notification (same user/type/issue
-    // pair/related-issue) was already sent within the given window.
     public void publishIfNotThrottled(
             Notification notification,
             String userId,
@@ -66,8 +64,6 @@ public class NotificationPublisher {
             String html = "<p>Hi " + recipient.getName() + ",</p><p>" + notification.getMessage() + "</p>";
             emailService.sendEmail(recipient.getEmail(), recipient.getName(), "Jira Clone notification", html);
         } catch (Exception e) {
-            // Email is best-effort — a failure here should never break the
-            // in-app notification that already succeeded above.
             System.out.println("Failed to send notification email: " + e.getMessage());
         }
     }

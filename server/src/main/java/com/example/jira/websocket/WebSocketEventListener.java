@@ -25,13 +25,6 @@ public class WebSocketEventListener {
     private final PresenceService presenceService;
     private final AccessControlService accessControlService;
 
-    // "sessionId:subscriptionId" -> present, ONLY for the one subscription
-    // per session that presence tracking actually cares about (the
-    // non-presence project topic). STOMP UNSUBSCRIBE frames carry only a
-    // subscription id, never the destination, so this is how
-    // handleUnsubscribe below tells "the tab left this project" apart from
-    // "the tab merely re-subscribed to /presence or /user/queue/notifications"
-    // — both of which fire the exact same SessionUnsubscribeEvent otherwise.
     private final java.util.Set<String> presenceTrackedSubscriptions = ConcurrentHashMap.newKeySet();
 
     public WebSocketEventListener(PresenceService presenceService, AccessControlService accessControlService) {
@@ -73,11 +66,6 @@ public class WebSocketEventListener {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
         String key = subscriptionKey(accessor.getSessionId(), accessor.getSubscriptionId());
 
-        // Only evict this session from presence if the subscription being
-        // cancelled was the tracked project topic — NOT every time any
-        // subscription on the connection (e.g. /presence itself, or
-        // /user/queue/notifications) happens to be torn down and
-        // re-established, which the client does routinely.
         if (presenceTrackedSubscriptions.remove(key)) {
             presenceService.onUnsubscribe(accessor.getSessionId());
         }
@@ -95,10 +83,6 @@ public class WebSocketEventListener {
         return sessionId + ":" + subscriptionId;
     }
 
-    // AccessControlService expects a Spring Security Authentication object;
-    // WebSocket sessions authenticate via our own handshake interceptor
-    // instead of the normal HTTP filter chain, so we build a minimal
-    // stand-in carrying just the userId it actually reads.
     private Authentication syntheticAuth(String userId) {
         return new AnonymousAuthenticationToken(
                 "ws", userId, java.util.List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_WS")));

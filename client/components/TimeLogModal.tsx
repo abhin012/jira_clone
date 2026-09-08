@@ -64,7 +64,6 @@ const TimeLogModal = ({
     setEditingLogId(null);
     setExpandedHistoryId(null);
     resetForm();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, issue?.id]);
 
   const userNameById = (id: string) => {

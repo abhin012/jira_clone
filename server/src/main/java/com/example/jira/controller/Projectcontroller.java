@@ -66,12 +66,10 @@ public class Projectcontroller {
     public ProjectResponse getProjectById(@PathVariable String id, Authentication authentication) {
         Project project = accessControlService.requireProjectAccess(id, authentication);
 
-        // Fetch owner
         User owner = project.getOwnerId() != null
                 ? userRepository.findById(new ObjectId(project.getOwnerId())).orElse(null)
                 : null;
 
-        // Fetch members (null-safe)
         List<String> memberIds = project.getMemberIds() != null ? project.getMemberIds() : new java.util.ArrayList<>();
         List<ObjectId> memberObjectIds = memberIds.stream()
                 .map(ObjectId::new)

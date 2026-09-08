@@ -48,9 +48,6 @@ public class WorkLogController {
         this.accessControlService = accessControlService;
     }
 
-    // =========================
-    // CREATE
-    // =========================
     @PostMapping
     public WorkLog createWorkLog(@RequestBody Map<String, Object> body, Authentication authentication) {
         String issueId = (String) body.get("issueId");
@@ -83,9 +80,6 @@ public class WorkLogController {
         return saved;
     }
 
-    // =========================
-    // GET LOGS FOR AN ISSUE
-    // =========================
     @GetMapping("/issue/{issueId}")
     public List<WorkLog> getLogsForIssue(@PathVariable String issueId, Authentication authentication) {
         Issue issue = issueRepository.findById(new ObjectId(issueId))
@@ -94,9 +88,6 @@ public class WorkLogController {
         return workLogRepository.findByIssueId(issueId);
     }
 
-    // =========================
-    // TOTAL HOURS FOR AN ISSUE
-    // =========================
     @GetMapping("/issue/{issueId}/total")
     public Map<String, Double> getIssueTotal(@PathVariable String issueId, Authentication authentication) {
         Issue issue = issueRepository.findById(new ObjectId(issueId))
@@ -109,9 +100,6 @@ public class WorkLogController {
         return Map.of("totalHours", total);
     }
 
-    // =========================
-    // TOTAL HOURS FOR A SPRINT
-    // =========================
     @GetMapping("/sprint/{sprintId}/total")
     public Map<String, Double> getSprintTotal(@PathVariable String sprintId, Authentication authentication) {
         var sprint = sprintRepository.findById(new ObjectId(sprintId))
@@ -128,9 +116,6 @@ public class WorkLogController {
         return Map.of("totalHours", total);
     }
 
-    // =========================
-    // PER-ISSUE BREAKDOWN FOR A SPRINT
-    // =========================
     @GetMapping("/sprint/{sprintId}/breakdown")
     public List<Map<String, Object>> getSprintBreakdown(@PathVariable String sprintId, Authentication authentication) {
         var sprint = sprintRepository.findById(new ObjectId(sprintId))
@@ -158,9 +143,6 @@ public class WorkLogController {
         return breakdown;
     }
 
-    // =========================
-    // UPDATE
-    // =========================
     @PutMapping("/{id}")
     public WorkLog updateWorkLog(
             @PathVariable String id,
@@ -209,9 +191,6 @@ public class WorkLogController {
         return saved;
     }
 
-    // =========================
-    // DELETE
-    // =========================
     @DeleteMapping("/{id}")
     public void deleteWorkLog(@PathVariable String id, Authentication authentication) {
         WorkLog log = workLogRepository.findById(new ObjectId(id))
@@ -231,9 +210,6 @@ public class WorkLogController {
         workLogRepository.deleteById(new ObjectId(id));
     }
 
-    // =========================
-    // Helpers
-    // =========================
     private void requireModifyRights(Issue issue, String userId) {
         Project project = projectrepository.findById(new ObjectId(issue.getProjectId()))
                 .orElseThrow(() -> new RuntimeException("Project not found"));

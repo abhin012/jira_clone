@@ -92,7 +92,7 @@ const Sidebar = () => {
 
   return (
     <div className="flex h-screen w-64 flex-col border-r bg-[#F4F5F7] text-[#42526E]">
-      {/* Header */}
+      {}
       <div className="flex items-center gap-2 p-4 pt-6">
         <div className="flex h-8 w-8 items-center justify-center rounded bg-[#0052CC] text-white">
           <FolderKanban className="h-5 w-5" />
@@ -102,7 +102,7 @@ const Sidebar = () => {
         </span>
       </div>
 
-      {/* Project Selector */}
+      {}
       {selectedProject && (
         <div className="px-2 py-3 border-b">
           <div className="relative">

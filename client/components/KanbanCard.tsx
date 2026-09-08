@@ -130,8 +130,6 @@ function CardContent({
   );
 }
 
-// Real draggable card used inside columns. Always calls useSortable —
-// no conditional hook calls, so it can't violate React's Rules of Hooks.
 const KanbanCard = ({ issue, onClick }: KanbanCardProps) => {
   const assignee = useAssignee(issue?.assigneeId);
   const { setNodeRef, attributes, listeners, transform, transition, isDragging } =
@@ -156,9 +154,6 @@ const KanbanCard = ({ issue, onClick }: KanbanCardProps) => {
   );
 };
 
-// Visual-only clone for the DragOverlay portal. Deliberately never calls
-// useSortable — registering the same issue id twice while dragging would
-// corrupt dnd-kit's internal state, so this is a plain, non-interactive copy.
 export const KanbanCardOverlay = ({ issue }: { issue: any }) => {
   const assignee = useAssignee(issue?.assigneeId);
 

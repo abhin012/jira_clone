@@ -32,15 +32,6 @@ const page = () => {
         });
         setStatus("success");
 
-        // If this browser has an active session for the SAME account whose
-        // email just changed (the common case: the link is opened in a new
-        // tab of the same browser the request came from), patch the stored
-        // email directly rather than leaving that other tab showing the
-        // stale one until a manual refresh or re-login. Writing to
-        // localStorage here also fires a `storage` event in any OTHER open
-        // tab of this origin — see AuthContext.tsx — so an already-open
-        // profile tab picks this up live, without the user doing anything
-        // there at all.
         try {
           const storedUser = localStorage.getItem("user");
           if (storedUser) {

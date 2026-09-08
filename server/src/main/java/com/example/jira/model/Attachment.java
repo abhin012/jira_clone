@@ -16,7 +16,7 @@ public class Attachment {
     private String projectId;
     private String uploadedBy;
     private String originalFilename;
-    private String storedFilename; // UUID-based name actually on disk
+    private String storedFilename;
     private String contentType;
     private long sizeBytes;
     private Instant uploadedAt = Instant.now();

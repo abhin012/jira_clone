@@ -29,10 +29,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        // /topic: project-scoped broadcasts (issue events, presence).
-        // /queue: used internally by convertAndSendToUser for per-user
-        // notification delivery — Spring rewrites /user/queue/... to a
-        // session-specific destination behind the scenes.
         registry.enableSimpleBroker("/topic", "/queue");
         registry.setApplicationDestinationPrefixes("/app");
         registry.setUserDestinationPrefix("/user");

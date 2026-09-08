@@ -63,60 +63,6 @@ const page = () => {
       </div>
     );
   }
-  // const projects = [
-  //   {
-  //     id: "proj-1",
-  //     name: "Platform Services",
-  //     key: "PS",
-  //     ownerId: "user-1",
-  //     memberIds: ["user-1", "user-2"],
-  //     createdAt: new Date().toISOString(),
-  //     description: "Core platform infrastructure and services",
-  //   },
-  // ];
-  // const sprints = {
-  //   id: "sprint-1",
-  //   name: "Sprint 1",
-  //   projectId: "proj-1",
-  //   startDate: new Date().toISOString(),
-  //   endDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-  //   status: "ACTIVE",
-  //   goal: "Implement core authentication and payment fixes",
-  // };
-  // const issues = [
-  //   {
-  //     id: "1",
-  //     key: "PS-124",
-  //     title: "Implement user authentication flow",
-  //     description: "Add OAuth and JWT token support",
-  //     type: "TASK",
-  //     status: "TODO",
-  //     priority: "HIGH",
-  //     projectId: "proj-1",
-  //     reporterId: "user-1",
-  //     assigneeId: "user-2",
-  //     order: 0,
-  //     createdAt: new Date().toISOString(),
-  //     updatedAt: new Date().toISOString(),
-  //     comments: [],
-  //   },
-  //   {
-  //     id: "2",
-  //     key: "PS-125",
-  //     title: "Fix critical bug in payment processing",
-  //     description: "Payment gateway timeout issue",
-  //     type: "BUG",
-  //     status: "IN_PROGRESS",
-  //     priority: "HIGH",
-  //     projectId: "proj-1",
-  //     reporterId: "user-1",
-  //     assigneeId: "user-1",
-  //     order: 0,
-  //     createdAt: new Date().toISOString(),
-  //     updatedAt: new Date().toISOString(),
-  //     comments: [],
-  //   },
-  // ];
   const redirectproject = () => {
     router.push("/create-project");
   };
@@ -175,19 +121,7 @@ const page = () => {
                     </div>
                   </div>
 
-                  {/* {activeSprint && (
-                    <div className="mt-4 p-3 rounded bg-blue-50 border border-blue-200">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Calendar className="h-4 w-4 text-blue-600" />
-                        <span className="font-semibold text-blue-900 text-sm">
-                          {activeSprint.name}
-                        </span>
-                      </div>
-                      <p className="text-xs text-blue-700">
-                        Active sprint • {activeSprint.goal || "No goal set"}
-                      </p>
-                    </div>
-                  )} */}
+                  {}
 
                   <Link href={`/`} onClick={() => setSelectedProject(project)}>
                     <Button

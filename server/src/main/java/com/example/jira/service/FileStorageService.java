@@ -21,7 +21,7 @@ import java.util.zip.ZipInputStream;
 @Service
 public class FileStorageService {
 
-    private static final long MAX_SIZE_BYTES = 10L * 1024 * 1024; // 10MB
+    private static final long MAX_SIZE_BYTES = 10L * 1024 * 1024;
 
     private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
             "application/pdf",
@@ -45,10 +45,6 @@ public class FileStorageService {
         }
     }
 
-    // Validates size + declared type (content-type header + extension) AND
-    // the file's actual byte content — the first two are client-reported
-    // and can be spoofed, so the magic-byte check is what actually catches
-    // a mislabeled or malicious file rather than just trusting labels.
     public void validate(MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new RuntimeException("Invalid: no file provided");
@@ -70,12 +66,6 @@ public class FileStorageService {
         validateMagicBytes(file, extension.toLowerCase());
     }
 
-    // Checks the file's actual leading bytes against the known signature
-    // for its claimed type. DOCX is a special case — it's a ZIP container
-    // (the same format family as XLSX/PPTX), so this can only confirm it's
-    // a genuine Office Open XML container, not specifically a Word document;
-    // true disambiguation would require deeper structural parsing than is
-    // reasonable here.
     private void validateMagicBytes(MultipartFile file, String extension) {
         byte[] header = new byte[8];
         try (InputStream is = file.getInputStream()) {
@@ -88,10 +78,10 @@ public class FileStorageService {
         }
 
         boolean matches = switch (extension) {
-            case "pdf" -> header[0] == 0x25 && header[1] == 0x50 && header[2] == 0x44 && header[3] == 0x46; // %PDF
+            case "pdf" -> header[0] == 0x25 && header[1] == 0x50 && header[2] == 0x44 && header[3] == 0x46;
             case "png" -> (header[0] & 0xFF) == 0x89 && header[1] == 0x50 && header[2] == 0x4E && header[3] == 0x47;
             case "jpg", "jpeg" -> (header[0] & 0xFF) == 0xFF && (header[1] & 0xFF) == 0xD8 && (header[2] & 0xFF) == 0xFF;
-            case "docx" -> (header[0] & 0xFF) == 0x50 && header[1] == 0x4B; // "PK" — ZIP/OOXML container
+            case "docx" -> (header[0] & 0xFF) == 0x50 && header[1] == 0x4B;
             default -> false;
         };
 
@@ -123,9 +113,6 @@ public class FileStorageService {
         }
     }
 
-    // Server-generated, never derived from client input — this is what
-    // actually prevents both filename collisions and any path-traversal
-    // risk from a maliciously crafted original filename.
     public String store(MultipartFile file) {
         String extension = extractExtension(file.getOriginalFilename());
         String storedFilename = UUID.randomUUID() + "." + extension;

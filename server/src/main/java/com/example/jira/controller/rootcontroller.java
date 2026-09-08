@@ -10,5 +10,5 @@ public class rootcontroller {
     public String home(){
         return "Server is Running";
     }
-    
+
 }

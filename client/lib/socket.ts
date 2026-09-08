@@ -11,18 +11,8 @@ export function getSocketClient(token: string): Client {
   if (client) return client;
 
     client = new Client({
-    // Force SockJS onto the raw 'websocket' transport only. Left to itself,
-    // SockJS's HTTP streaming fallbacks (xhr-streaming etc.) get buffered by
-    // the platform's reverse proxy — frames the SERVER pushes (presence
-    // updates, issue events) can then sit in that buffer instead of
-    // arriving live, even though frames WE send (subscribe, heartbeats)
-    // go out fine as separate requests. That's what produced the
-    // "works after a refresh" symptom: a fresh connection sometimes landed
-    // on plain 'websocket' and worked, sometimes fell back and silently
-    // stopped receiving pushes. Native WebSocket is supported by every
-    // browser this app targets, so there's no real fallback to give up.
     webSocketFactory: () => new SockJS(`${WS_BASE_URL}?token=${token}`, undefined, { transports: "websocket" }) as any,
-    reconnectDelay: 5000, // auto-reconnect after a dropped connection
+    reconnectDelay: 5000,
     heartbeatIncoming: 10000,
     heartbeatOutgoing: 10000,
     debug: (str) => console.log("[STOMP]", str),
@@ -32,11 +22,6 @@ export function getSocketClient(token: string): Client {
     onWebSocketError: (event) => {
       console.error("WebSocket connection error:", event);
     },
-    // Not set here: AuthContext.tsx assigns onConnect/onDisconnect/
-    // onWebSocketClose itself, to drive its `socketConnected` state (which
-    // in turn drives re-subscribing after a reconnect) — owning the close
-    // logging there too keeps it in one place instead of split across
-    // two files with one silently overwriting the other's handler.
   });
 
   return client;

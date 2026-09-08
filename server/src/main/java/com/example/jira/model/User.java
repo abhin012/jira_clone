@@ -16,9 +16,6 @@ public class User {
     private String email;
     private String phone;
 
-    // Write-only: accepted when parsing signup/login/set-password request
-    // bodies, but never included in any JSON response — no endpoint should
-    // ever send a password hash back to the browser.
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
     private String role;
@@ -29,9 +26,6 @@ public class User {
         private boolean active = true;
     private boolean emailNotificationsEnabled = true;
 
-        // Pending-email-change verification state. Both a code and a link
-    // token are issued on every request, regardless of which method the
-    // user picks — the confirm step just checks whichever one arrives.
     private String pendingEmail;
     private String emailVerificationToken;
     private String emailVerificationLinkToken;

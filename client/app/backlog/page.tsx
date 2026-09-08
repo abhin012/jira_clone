@@ -26,9 +26,6 @@ const page = () => {
   const [activeTab, setActiveTab] = useState<"backlog" | "completed">("backlog");
   const [timeBreakdownSprint, setTimeBreakdownSprint] = useState<any>(null);
 
-  /* =====================
-     Fetch backlog data
-  ===================== */
   const fetchData = async () => {
     if (!selectedProject?.id) return;
 
@@ -45,7 +42,6 @@ const page = () => {
     } catch (err: any) {
       console.error("Failed to load backlog", err);
       if (err.response?.status === 403 || err.response?.status === 404) {
-        // handled globally via selectedProject clearing elsewhere
       }
     } finally {
       setLoading(false);
@@ -56,9 +52,6 @@ const page = () => {
     fetchData();
   }, [selectedProject?.id, issuesVersion]);
 
-  // Keep the open issue modal's `issue` prop pointing at current data as
-  // the backlog refetches (e.g. after a realtime event from someone
-  // else's comment/edit) — see the matching effect in KanbanBoard.tsx.
   useEffect(() => {
     if (!selectedIssue) return;
     const fresh = issues.find((i: any) => i.id === selectedIssue.id);
@@ -67,9 +60,6 @@ const page = () => {
     }
   }, [issues]);
 
-  /* =====================
-     Create backlog issue
-  ===================== */
   const createIssue = async () => {
     if (!newTitle.trim() || !selectedProject || !user) return;
 
@@ -81,7 +71,7 @@ const page = () => {
         priority: "MEDIUM",
         type: "TASK",
         reporterId: user.id,
-        sprintId: null, // BACKLOG
+        sprintId: null,
       });
 
       setNewTitle("");
@@ -92,9 +82,6 @@ const page = () => {
     }
   };
 
-  /* =====================
-     Sprint actions
-  ===================== */
   const createSprint = async () => {
     if (!newSprintName.trim() || !selectedProject) return;
 
@@ -186,10 +173,6 @@ const page = () => {
   const movableSprints = sprints.filter((s) => s.status !== "COMPLETED");
   const completedIssues = issues.filter((i) => i.status === "DONE");
 
-  // Group completed issues by sprint, same shape as the Backlog tab's
-  // sprint sections — including a fallback group for issues whose sprint
-  // was later deleted, and one for issues finished without ever being in
-  // a sprint at all.
   const completedGroupMap = new Map<string, { key: string; label: string; issues: any[] }>();
   for (const issue of completedIssues) {
     let key: string;
@@ -218,7 +201,7 @@ const page = () => {
 
   return (
     <div className="flex h-full flex-col p-6 overflow-hidden">
-      {/* Breadcrumb */}
+      {}
       <div className="mb-6 flex flex-col gap-4">
         <div className="flex items-center gap-2 text-sm text-[#5E6C84]">
           <span>Projects</span>
@@ -294,7 +277,7 @@ const page = () => {
             </div>
           )}
 
-          {/* Sprint Sections */}
+          {}
           {sprints.map((sprint) => {
             const sprintIssues = issues.filter((i) => i.sprintId === sprint.id);
             return (
@@ -313,7 +296,7 @@ const page = () => {
             );
           })}
 
-          {/* Backlog Section */}
+          {}
           <section>
             <SectionHeader title="Backlog" count={backlogIssues.length} />
 
@@ -436,7 +419,6 @@ const SprintSection = ({
   onMoveIssue,
   onViewTimeBreakdown,
 }: any) => {
-  // Only show non-DONE issues here — finished issues live in the Completed tab.
   const visibleIssues = issues.filter((i: any) => i.status !== "DONE");
   const [totalHours, setTotalHours] = useState<number | null>(null);
 

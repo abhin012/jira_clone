@@ -42,9 +42,6 @@ public class SprintController {
         this.notificationPublisher = notificationPublisher;
     }
 
-    // Everyone with a stake in this sprint: unique assignees/reporters of its
-    // issues, plus the project's PM (owner), so they always know regardless
-    // of whether they have work directly in it.
     private Set<String> sprintParticipants(String sprintId, String projectId) {
         Set<String> participants = new HashSet<>();
         for (Issue issue : issueRepository.findBySprintId(sprintId)) {
@@ -68,9 +65,6 @@ public class SprintController {
         }
     }
 
-    // =========================
-    // CREATE SPRINT
-    // =========================
     @PostMapping
     public Sprint createSprint(@RequestBody Sprint sprint, Authentication authentication) {
         accessControlService.requireProjectAccess(sprint.getProjectId(), authentication);
@@ -78,18 +72,12 @@ public class SprintController {
         return sprintRepository.save(sprint);
     }
 
-    // =========================
-    // GET SPRINTS BY PROJECT
-    // =========================
     @GetMapping("/project/{projectId}")
     public List<Sprint> getSprintsByProject(@PathVariable String projectId, Authentication authentication) {
         accessControlService.requireProjectAccess(projectId, authentication);
         return sprintRepository.findByProjectId(projectId);
     }
 
-    // =========================
-    // START SPRINT
-    // =========================
     @PutMapping("/{id}/start")
     public Sprint startSprint(@PathVariable String id, Authentication authentication) {
 
@@ -115,9 +103,6 @@ public class SprintController {
         return saved;
     }
 
-    // =========================
-    // COMPLETE SPRINT
-    // =========================
     @PutMapping("/{id}/complete")
     public Sprint completeSprint(@PathVariable String id, Authentication authentication) {
 
@@ -129,8 +114,6 @@ public class SprintController {
         sprint.setStatus("COMPLETED");
         sprint.setEndDate(Instant.now());
 
-        // Capture participants before completion moves issues out of the
-        // sprint — otherwise sprintParticipants() would find nothing left.
         Set<String> participantsBeforeMove = sprintParticipants(id, sprint.getProjectId());
 
         Sprint saved = sprintRepository.save(sprint);
@@ -145,9 +128,6 @@ public class SprintController {
             notificationPublisher.publish(notification);
         }
 
-        // Move any unfinished issues back to the backlog so they aren't
-        // stranded inside a completed sprint. Finished (DONE) issues stay
-        // attached, as a record of what this sprint actually delivered.
         List<Issue> sprintIssues = issueRepository.findBySprintId(id);
         for (Issue issue : sprintIssues) {
             if (!"DONE".equals(issue.getStatus())) {
@@ -160,9 +140,6 @@ public class SprintController {
         return saved;
     }
 
-    // =========================
-    // UPDATE SPRINT DETAILS
-    // =========================
     @PutMapping("/{id}")
     public Sprint updateSprint(
             @PathVariable String id,
@@ -182,9 +159,6 @@ public class SprintController {
         return sprintRepository.save(sprint);
     }
 
-    // =========================
-    // DELETE SPRINT
-    // =========================
     @DeleteMapping("/{id}")
     public void deleteSprint(@PathVariable String id, Authentication authentication) {
 
@@ -193,10 +167,6 @@ public class SprintController {
 
         accessControlService.requireProjectAccess(sprint.getProjectId(), authentication);
 
-        // Unfinished issues go back to the backlog. Finished (DONE) issues
-        // keep their sprintId as a historical pointer — the sprint object
-        // is gone, but the frontend's Completed tab finds them by status
-        // alone, not by a still-existing sprint.
         List<Issue> sprintIssues = issueRepository.findBySprintId(id);
         for (Issue issue : sprintIssues) {
             if (!"DONE".equals(issue.getStatus())) {
@@ -209,9 +179,6 @@ public class SprintController {
         sprintRepository.deleteById(new ObjectId(id));
     }
 
-    // =========================
-    // ASSIGN ISSUE TO SPRINT
-    // =========================
     @PutMapping("/{sprintId}/issues/{issueId}")
     public Issue addIssueToSprint(
             @PathVariable String sprintId,

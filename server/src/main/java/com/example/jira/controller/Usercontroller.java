@@ -39,9 +39,6 @@ public class Usercontroller {
     @Value("${app.frontend-url:http://localhost:3000}")
     private String frontendUrl;
 
-    // =========================
-    // CHECK EMAIL STATUS (public — drives the login flow's first step)
-    // =========================
     @PostMapping("/check-email")
     public Map<String, String> checkEmail(@RequestBody Map<String, String> body) {
         String email = body.get("email");
@@ -58,9 +55,6 @@ public class Usercontroller {
         return Map.of("status", status);
     }
 
-    // =========================
-    // SIGNUP (brand new accounts only)
-    // =========================
     @PostMapping("/signup")
     public AuthResponse signup(@RequestBody User user) {
 
@@ -78,10 +72,6 @@ public class Usercontroller {
         return new AuthResponse(saved, token);
     }
 
-    // =========================
-    // SET PASSWORD (public — for accounts created via invite that have
-    // never had a password; auto-logs the user in on success)
-    // =========================
     @PostMapping("/set-password")
     public AuthResponse setPassword(@RequestBody Map<String, String> body) {
         String email = body.get("email");
@@ -102,10 +92,6 @@ public class Usercontroller {
         return new AuthResponse(saved, token);
     }
 
-    // =========================
-    // INVITE (protected — adds a teammate with no password set yet;
-    // they create their own password the first time they log in)
-    // =========================
     @PostMapping("/invite")
     public UserSummary invite(@RequestBody Map<String, String> body) {
         String name = body.get("name");
@@ -129,9 +115,6 @@ public class Usercontroller {
         return new UserSummary(saved);
     }
 
-    // =========================
-    // LOGIN
-    // =========================
     @PostMapping("/login")
     public AuthResponse login(@RequestBody User loginRequest) {
 
@@ -156,9 +139,6 @@ public class Usercontroller {
         return new AuthResponse(user, token);
     }
 
-    // =========================
-    // LOOKUP BY EMAIL (for adding an existing user to a project)
-    // =========================
     @GetMapping("/by-email")
     public UserSummary getUserByEmail(@RequestParam String email) {
         User user = userRepository.findByEmail(email)
@@ -166,9 +146,6 @@ public class Usercontroller {
         return new UserSummary(user);
     }
 
-    // =========================
-    // GET USER BY ID
-    // =========================
     @GetMapping("/{id}")
     public User getUserById(@PathVariable String id) {
 
@@ -183,10 +160,6 @@ public class Usercontroller {
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    // =========================
-    // EDIT PROFILE (self only — name, phone, avatar; NOT email or password,
-    // those go through their own dedicated, more carefully guarded flows)
-    // =========================
     @PutMapping("/{id}")
     public User editProfile(
             @PathVariable String id,
@@ -215,9 +188,6 @@ public class Usercontroller {
         return userRepository.save(user);
     }
 
-    // =========================
-    // CHANGE PASSWORD (self only — requires current password + strength check)
-    // =========================
     @PutMapping("/{id}/password")
     public Map<String, String> changePassword(
             @PathVariable String id,
@@ -248,13 +218,6 @@ public class Usercontroller {
         return Map.of("message", "Password updated successfully");
     }
 
-    // =========================
-    // REQUEST EMAIL CHANGE (self only — requires current password;
-    // generates a verification token. No email service is configured in
-    // this project, so the confirmation link is returned directly in the
-    // response rather than emailed — in production this would be sent to
-    // the NEW address instead.)
-    // =========================
     @PostMapping("/{id}/email-change-request")
     public Map<String, String> requestEmailChange(
             @PathVariable String id,
@@ -268,7 +231,7 @@ public class Usercontroller {
 
         String newEmail = body.get("newEmail");
         String currentPassword = body.get("currentPassword");
-        String method = body.getOrDefault("method", "OTP"); // "OTP" or "LINK"
+        String method = body.getOrDefault("method", "OTP");
 
         if (currentPassword == null || !passwordEncoder.matches(currentPassword, user.getPassword())) {
             throw new RuntimeException("Invalid: current password is incorrect");
@@ -332,9 +295,6 @@ public class Usercontroller {
         }
     }
 
-    // =========================
-    // CONFIRM EMAIL CHANGE — OTP (self only, entered while still in-session)
-    // =========================
     @PutMapping("/{id}/confirm-email")
     public User confirmEmailChange(
             @PathVariable String id,
@@ -351,10 +311,6 @@ public class Usercontroller {
         return userRepository.save(user);
     }
 
-    // =========================
-    // CONFIRM EMAIL CHANGE — LINK (public — reached via the emailed link,
-    // so the caller may not have an active session)
-    // =========================
     @GetMapping("/confirm-email-link")
     public Map<String, String> confirmEmailByLink(@RequestParam String token) {
         User user = userRepository.findByEmailVerificationLinkToken(token)
@@ -363,19 +319,12 @@ public class Usercontroller {
         applyPendingEmailChange(user, null, token);
         User saved = userRepository.save(user);
 
-        // id + new email only — enough for the confirm-email page to patch
-        // a matching locally-stored session (see AuthContext.tsx) without
-        // exposing anything else to a caller who's only proven possession
-        // of the link, not an active login.
         return Map.of(
                 "message", "Email updated successfully.",
                 "id", saved.getId(),
                 "email", saved.getEmail());
     }
 
-    // Shared by both confirmation paths — exactly one of otp/linkToken is
-    // non-null depending on which method the caller used. Confirming via
-    // either one clears both pending tokens, invalidating the unused method.
     private void applyPendingEmailChange(User user, String otp, String linkToken) {
         if (user.getPendingEmail() == null) {
             throw new RuntimeException("Invalid: no pending email change found — request a new one first");
@@ -402,9 +351,6 @@ public class Usercontroller {
         user.setEmailVerificationExpiry(null);
     }
 
-    // =========================
-    // NOTIFICATION PREFERENCES (self only)
-    // =========================
     @PutMapping("/{id}/notification-preferences")
     public User updateNotificationPreferences(
             @PathVariable String id,
@@ -424,10 +370,6 @@ public class Usercontroller {
         return userRepository.save(user);
     }
 
-    // =========================
-    // DEACTIVATE ACCOUNT (self only — blocks future logins but preserves
-    // all historical data; nothing is deleted, only the `active` flag flips)
-    // =========================
     @PutMapping("/{id}/deactivate")
     public Map<String, String> deactivateAccount(@PathVariable String id, Authentication authentication) {
         requireSelf(id, authentication);
@@ -441,9 +383,6 @@ public class Usercontroller {
         return Map.of("message", "Account deactivated");
     }
 
-    // =========================
-    // Helpers
-    // =========================
     private void requireSelf(String id, Authentication authentication) {
         String callerId = accessControlService.currentUserId(authentication);
         if (!callerId.equals(id)) {
@@ -469,9 +408,6 @@ public class Usercontroller {
         }
     }
 
-    // Only checks uploaded (data-URI) avatars — plain URLs (e.g. the
-    // auto-generated pravatar links used elsewhere in the app) pass through
-    // untouched, since they were never a file upload to begin with.
     private void validateAvatar(String avatar) {
         if (avatar == null || !avatar.startsWith("data:")) {
             return;
@@ -483,7 +419,7 @@ public class Usercontroller {
 
         String base64Data = avatar.substring(avatar.indexOf(",") + 1);
         long approxBytes = (long) (base64Data.length() * 0.75);
-        long maxBytes = 2L * 1024 * 1024; // 2MB
+        long maxBytes = 2L * 1024 * 1024;
 
         if (approxBytes > maxBytes) {
             throw new RuntimeException("Invalid: profile image must be under 2MB");

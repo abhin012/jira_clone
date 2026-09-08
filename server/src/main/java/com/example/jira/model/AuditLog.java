@@ -12,8 +12,8 @@ public class AuditLog {
     @Id
     private ObjectId id;
 
-    private String action;       // CREATE, UPDATE, DELETE
-    private String entityType;   // e.g. "WORK_LOG"
+    private String action;
+    private String entityType;
     private String entityId;
     private String projectId;
     private String issueId;
@@ -46,7 +46,7 @@ public class AuditLog {
 
     public String getIssueTitle() { return issueTitle; }
     public void setIssueTitle(String issueTitle) { this.issueTitle = issueTitle; }
-    
+
     public String getPerformedBy() { return performedBy; }
     public void setPerformedBy(String performedBy) { this.performedBy = performedBy; }
 

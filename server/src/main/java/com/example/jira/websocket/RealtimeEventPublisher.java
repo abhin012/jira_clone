@@ -15,7 +15,6 @@ public class RealtimeEventPublisher {
         this.messagingTemplate = messagingTemplate;
     }
 
-    // type: ISSUE_CREATED | ISSUE_UPDATED | ISSUE_DELETED
     public void publishIssueEvent(String type, String projectId, String actorUserId, Object payload) {
         RealtimeEvent event = new RealtimeEvent();
         event.eventId = UUID.randomUUID().toString();

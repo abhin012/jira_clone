@@ -7,7 +7,7 @@ import axiosInstance from "@/lib/Axiosinstance";
 import { useAuth } from "@/lib/AuthContext";
 import { getUserById } from "@/lib/userCache";
 
-const MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
+const MAX_SIZE_BYTES = 10 * 1024 * 1024;
 const ALLOWED_TYPES = [
   "application/pdf",
   "image/png",
@@ -104,13 +104,12 @@ const AttachmentsSection = ({ issue }: { issue: any }) => {
 
   useEffect(() => {
     fetchAttachments();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [issue?.id, attachmentsVersion]);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    e.target.value = ""; // allow re-selecting the same file later
+    e.target.value = "";
     setError("");
 
     if (!ALLOWED_TYPES.includes(file.type)) {

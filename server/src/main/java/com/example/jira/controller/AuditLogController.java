@@ -23,8 +23,6 @@ public class AuditLogController {
         this.accessControlService = accessControlService;
     }
 
-    // Generic entity audit trail — reusable for any audited entity type,
-    // not just work logs.
     @GetMapping("/entity/{entityType}/{entityId}")
     public List<AuditLog> getEntityAudit(
             @PathVariable String entityType,
@@ -34,8 +32,6 @@ public class AuditLogController {
         List<AuditLog> entries = auditLogRepository
                 .findByEntityTypeAndEntityIdOrderByTimestampDesc(entityType, entityId);
 
-        // Confirm the caller actually has access to at least one of these
-        // entries' projects before returning anything.
         if (!entries.isEmpty()) {
             accessControlService.requireProjectAccess(entries.get(0).getProjectId(), authentication);
         }

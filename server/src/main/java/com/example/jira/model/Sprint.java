@@ -16,7 +16,7 @@ public class Sprint {
     private String projectId;
     private Instant startDate;
     private Instant endDate;
-    private String status; 
+    private String status;
     private String goal;
 
     public String getId() {

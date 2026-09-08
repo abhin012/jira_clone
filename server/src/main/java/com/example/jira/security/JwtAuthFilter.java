@@ -32,12 +32,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
 
-        // Runs on literally every request through this filter chain — see
-        // ReminderScheduler for why: it's the fallback that lets due-date
-        // reminders still fire on a host that suspends the process when
-        // idle, by piggybacking a throttled sweep on whatever traffic
-        // happens to wake it back up, rather than relying solely on
-        // @Scheduled (which can't run while the process itself is asleep).
         reminderScheduler.runIfDueAsync();
 
         String authHeader = request.getHeader("Authorization");
