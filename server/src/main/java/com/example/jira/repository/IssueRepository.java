@@ -19,6 +19,12 @@ public interface IssueRepository extends MongoRepository<Issue, ObjectId> {
     @Query("{ 'dependsOn': ?0 }")
     List<Issue> findByDependsOnContaining(String issueId);
 
-    List<Issue> findByDueDateAndReminderSentFalse(java.time.LocalDate dueDate);    List<Issue> findByDueDateBetweenAndReminderSentFalse(
-            java.time.LocalDateTime start, java.time.LocalDateTime end);
+    // Every not-yet-completed issue whose due date has entered a reminder
+    // tier's window (due date <= threshold) — used once per tier by
+    // ReminderScheduler, which then filters out issues that already got
+    // THAT tier's reminder. Matching on "<= threshold" rather than a narrow
+    // time slice means a tier can't be silently skipped by the job running
+    // a little late or missing a beat after a restart.
+    List<Issue> findByDueDateLessThanEqualAndStatusNot(
+            java.time.LocalDateTime threshold, String status);
 }

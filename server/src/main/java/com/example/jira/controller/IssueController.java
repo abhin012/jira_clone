@@ -234,7 +234,12 @@ public class IssueController {
         issue.setComments(updated.getComments());
         issue.setDueDate(updated.getDueDate());
         if (dueDateChanged) {
-            issue.setReminderSent(false);
+            // A rescheduled due date should get its full 24h/10h/90m
+            // reminder sequence again, not just whichever tier happens to
+            // still be in front of it.
+            issue.setReminder24hSent(false);
+            issue.setReminder10hSent(false);
+            issue.setReminder90mSent(false);
         }
         issue.setVersion(issue.getVersion() + 1);
 

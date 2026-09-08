@@ -401,7 +401,7 @@ const IssueModel = ({ issue, isOpen, onClose }: any) => {
           </DialogTitle>
         </DialogHeader>
 
-        {!localIssue || loading ? (
+        {!localIssue ? (
           <div className="flex h-64 items-center justify-center text-sm text-[#6B778C]">
             Loading issue…
           </div>

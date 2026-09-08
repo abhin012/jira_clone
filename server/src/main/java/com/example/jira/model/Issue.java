@@ -61,9 +61,14 @@ public class Issue {
 
         private java.time.LocalDateTime dueDate;
 
-    // Guarantees the 24h-before-deadline reminder fires exactly once per
-    // due date, regardless of how many times the scheduled job runs.
-    private boolean reminderSent = false;
+    // Guarantees each due-date reminder tier fires exactly once per due
+    // date, regardless of how many times the scheduled job runs — one flag
+    // per tier so the 24h/10h/90m-before reminders are independent of each
+    // other. Reset together whenever the due date itself changes (see
+    // IssueController) so a rescheduled task gets the full sequence again.
+    private boolean reminder24hSent = false;
+    private boolean reminder10hSent = false;
+    private boolean reminder90mSent = false;
 
     // Computed at read time only — never persisted. @Transient prevents
     // Spring Data from writing these into the actual Mongo document on
@@ -144,6 +149,12 @@ public class Issue {
         public java.time.LocalDateTime getDueDate() { return dueDate; }
     public void setDueDate(java.time.LocalDateTime dueDate) { this.dueDate = dueDate; }
 
-    public boolean isReminderSent() { return reminderSent; }
-    public void setReminderSent(boolean reminderSent) { this.reminderSent = reminderSent; }
+    public boolean isReminder24hSent() { return reminder24hSent; }
+    public void setReminder24hSent(boolean reminder24hSent) { this.reminder24hSent = reminder24hSent; }
+
+    public boolean isReminder10hSent() { return reminder10hSent; }
+    public void setReminder10hSent(boolean reminder10hSent) { this.reminder10hSent = reminder10hSent; }
+
+    public boolean isReminder90mSent() { return reminder90mSent; }
+    public void setReminder90mSent(boolean reminder90mSent) { this.reminder90mSent = reminder90mSent; }
 }
