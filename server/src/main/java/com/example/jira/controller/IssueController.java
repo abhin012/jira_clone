@@ -242,6 +242,7 @@ public class IssueController {
 
         if ("DONE".equals(targetStatus) && !"DONE".equals(previousStatus)) {
             notifyDependents(saved);
+            clearCompletedDependencyFromDependents(saved);
         }
 
         // Task assignment — only when it's a genuinely new assignee, and
@@ -305,6 +306,29 @@ public class IssueController {
                     "\"" + completedIssue.getTitle() + "\" is now Done — \""
                             + dependent.getTitle() + "\" is no longer blocked.");
             notificationPublisher.publish(notification);
+        }
+    }
+
+    // Once a task is Done, it can't block anything anymore — strip it out of
+    // the dependsOn list of every task that was waiting on it, immediately.
+    // Only the completed task is removed from THEIR list; the reverse edge
+    // (tasks that depend on the one we just completed) is untouched, and any
+    // OTHER still-open blockers those dependents have stay in place.
+    // actorUserId is intentionally left null on the realtime event below —
+    // this is a side effect of completing a different issue, not something
+    // the caller's own client already applied locally, so even the actor's
+    // own board needs to refetch to see the dependents' cards unblock.
+    private void clearCompletedDependencyFromDependents(Issue completedIssue) {
+        List<Issue> dependents = issueRepository.findByDependsOnContaining(completedIssue.getId());
+        for (Issue dependent : dependents) {
+            List<String> deps = new ArrayList<>(dependent.getDependsOn());
+            deps.remove(completedIssue.getId());
+            dependent.setDependsOn(deps);
+            dependent.setUpdatedAt(Instant.now());
+            dependent.setVersion(dependent.getVersion() + 1);
+            Issue savedDependent = issueRepository.save(dependent);
+            realtimeEventPublisher.publishIssueEvent(
+                    "ISSUE_UPDATED", savedDependent.getProjectId(), null, savedDependent);
         }
     }
 
