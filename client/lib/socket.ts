@@ -32,9 +32,11 @@ export function getSocketClient(token: string): Client {
     onWebSocketError: (event) => {
       console.error("WebSocket connection error:", event);
     },
-    onWebSocketClose: (event) => {
-      console.warn("WebSocket closed:", event.code, event.reason);
-    },
+    // Not set here: AuthContext.tsx assigns onConnect/onDisconnect/
+    // onWebSocketClose itself, to drive its `socketConnected` state (which
+    // in turn drives re-subscribing after a reconnect) — owning the close
+    // logging there too keeps it in one place instead of split across
+    // two files with one silently overwriting the other's handler.
   });
 
   return client;

@@ -49,6 +49,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [activeProjectUserIds, setActiveProjectUserIds] = useState<string[]>([]);
   const [notificationsVersion, setNotificationsVersion] = useState(0);
   const [attachmentsVersion, setAttachmentsVersion] = useState(0);
+  // Tracks the STOMP connection itself as React state (rather than only
+  // ever consulting client.connected ad hoc) so a dedicated effect below can
+  // react to "just became connected" the same way it reacts to "project
+  // changed" — see that effect for why the two need to be driven by the
+  // same mechanism.
+  const [socketConnected, setSocketConnected] = useState(false);
   const bumpIssuesVersion = () => setIssuesVersion((v) => v + 1);
   const INACTIVITY_LIMIT_MS = 30 * 60 * 1000; // 30 minutes
 
@@ -58,6 +64,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const issueSubscriptionRef = useRef<StompSubscription | null>(null);
   const presenceSubscriptionRef = useRef<StompSubscription | null>(null);
   const notificationSubscriptionRef = useRef<StompSubscription | null>(null);
+
+  // Mirrors `selectedProject` for subscribeToCurrentProject() to read instead
+  // of the state variable directly. `client.onConnect` below is assigned
+  // once inside the [user] effect, so the closure it captures is frozen at
+  // whatever `selectedProject` was on THAT render — if the project gets
+  // selected/changed afterward (e.g. a fresh login picking a project only
+  // after the socket already connected), that stale closure would keep
+  // silently no-op'ing forever, since [user] never changes again to
+  // refresh it. Reading through a ref sidesteps that: every call sees the
+  // current project no matter how old the closure holding the call is.
+  const selectedProjectRef = useRef<Project | null>(null);
+  useEffect(() => {
+    selectedProjectRef.current = selectedProject;
+  }, [selectedProject]);
 
   // Load user from localStorage on first load — but only if their session
   // hasn't been idle for longer than the inactivity limit.
@@ -124,11 +144,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const client = getSocketClient(token);
 
     client.onConnect = () => {
-      // Re-subscribe here (not just once at initial connect) — this
-      // callback also fires again after every automatic reconnect, so
-      // resubscribing inside it is what keeps updates flowing after a
-      // temporary network failure without any manual intervention.
-      subscribeToCurrentProject();
+      // Just flip the flag — do NOT call subscribeToCurrentProject() here
+      // directly. It used to be called from this callback, but onConnect
+      // can fire before selectedProject has been restored (from
+      // localStorage, or picked by the user) into React state, since the
+      // WS handshake and React's render/effect cycle are two independent
+      // async processes with no guaranteed ordering. When that race lost,
+      // subscribeToCurrentProject() would bail out on its
+      // !currentProject?.id guard, and — because this callback only fires
+      // ONCE per connection — nothing ever retried, permanently leaving
+      // that session with no project/presence subscription. Routing both
+      // "socket connected" and "project selected" through the same
+      // dependency-array effect below (rather than one being an imperative
+      // callback and the other a separate effect) means whichever one
+      // resolves last is the one that ends up triggering the subscribe.
+      setSocketConnected(true);
 
       // User-scoped, not project-scoped — a notification can arrive about
       // a project you aren't even currently viewing, so this subscribes
@@ -139,12 +169,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         () => setNotificationsVersion((v) => v + 1),
       );
     };
+    client.onDisconnect = () => setSocketConnected(false);
+    // onDisconnect only fires for a clean, negotiated STOMP disconnect — an
+    // abrupt drop (network loss, server restart) instead fires this, so both
+    // are needed to reliably flip socketConnected back to false. That flip
+    // matters even though the library's own reconnectDelay handles the
+    // reconnect itself: onConnect firing again after a silent reconnect
+    // wouldn't otherwise change socketConnected (already true), so the
+    // resubscribe effect below would never re-run.
+    client.onWebSocketClose = (event) => {
+      console.warn("WebSocket closed:", event.code, event.reason);
+      setSocketConnected(false);
+    };
 
     if (!client.active) {
       client.activate();
     } else {
-      // Already connected from a previous render — just (re)subscribe.
-      subscribeToCurrentProject();
+      // Already connected from a previous render — the onConnect callback
+      // above won't fire again for an already-open connection, so sync the
+      // flag directly instead of waiting for an event that isn't coming.
+      setSocketConnected(client.connected);
     }
 
     return () => {
@@ -158,15 +202,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
-  // Re-subscribe whenever the selected project changes.
+  // The single source of truth for (re)subscribing to the current project's
+  // issue + presence topics. Fires whenever EITHER half of the "can we
+  // subscribe now?" condition changes — the socket becoming connected, or
+  // the selected project changing — so whichever one becomes true last is
+  // guaranteed to trigger it, instead of each being wired to its own
+  // one-shot trigger that can fire before the other half is ready.
   useEffect(() => {
     subscribeToCurrentProject();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedProject?.id]);
+  }, [socketConnected, selectedProject?.id]);
 
   const subscribeToCurrentProject = () => {
     const token = localStorage.getItem("token");
-    if (!user || !token || !selectedProject?.id) return;
+    const currentProject = selectedProjectRef.current;
+    if (!user || !token || !currentProject?.id) return;
 
     const client = getSocketClient(token);
     if (!client.connected) return;
@@ -176,7 +226,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setActiveProjectUserIds([]);
 
     issueSubscriptionRef.current = client.subscribe(
-      `/topic/project/${selectedProject.id}`,
+      `/topic/project/${currentProject.id}`,
       (message: IMessage) => {
         const event: ProjectEvent = parseEvent(message);
 
@@ -204,7 +254,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     );
 
         presenceSubscriptionRef.current = client.subscribe(
-      `/topic/project/${selectedProject.id}/presence`,
+      `/topic/project/${currentProject.id}/presence`,
       (message: IMessage) => {
         try {
           const userIds: string[] = JSON.parse(message.body);
@@ -220,7 +270,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // registering us, so a just-joined user isn't guaranteed to see who
     // was already there from the broadcast alone.
     axiosInstance
-      .get(`/api/projects/${selectedProject.id}/presence`)
+      .get(`/api/projects/${currentProject.id}/presence`)
       .then((res: any) => setActiveProjectUserIds(res.data))
       .catch(() => {});
   };
