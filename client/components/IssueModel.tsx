@@ -360,6 +360,12 @@ const IssueModel = ({ issue, isOpen, onClose }: any) => {
       );
       setLocalIssue(res.data);
       setSelectedDependencyId("");
+      // Without this, only the modal's own copy learns about the new
+      // dependency — the board's issues array (which is what re-seeds this
+      // modal's initial state on the next open, via the `issue` prop) stays
+      // stale, so closing and reopening the same issue would show it with
+      // no dependencies again.
+      bumpIssuesVersion();
     } catch (err: any) {
       alert(err.response?.data?.message || "Failed to add dependency");
     }
@@ -372,6 +378,7 @@ const IssueModel = ({ issue, isOpen, onClose }: any) => {
         `/api/issues/${localIssue.id}/dependencies/${depId}`,
       );
       setLocalIssue(res.data);
+      bumpIssuesVersion();
     } catch (err) {
       console.error("Failed to remove dependency", err);
     }
