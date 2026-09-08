@@ -56,6 +56,17 @@ const page = () => {
     fetchData();
   }, [selectedProject?.id, issuesVersion]);
 
+  // Keep the open issue modal's `issue` prop pointing at current data as
+  // the backlog refetches (e.g. after a realtime event from someone
+  // else's comment/edit) — see the matching effect in KanbanBoard.tsx.
+  useEffect(() => {
+    if (!selectedIssue) return;
+    const fresh = issues.find((i: any) => i.id === selectedIssue.id);
+    if (fresh && fresh !== selectedIssue) {
+      setSelectedIssue(fresh);
+    }
+  }, [issues]);
+
   /* =====================
      Create backlog issue
   ===================== */

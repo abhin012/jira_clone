@@ -88,6 +88,23 @@ const IssueModel = ({ issue, isOpen, onClose }: any) => {
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
 
+  // Adopt a newer `issue` prop while this same modal instance stays open —
+  // the parent board/backlog page re-passes a fresh object here whenever
+  // it refetches (e.g. a realtime event fired because a second person
+  // added a comment). Comparing `version` rather than just re-seeding on
+  // every prop change avoids clobbering this session's own in-flight
+  // optimistic update with a same-or-older copy of itself; every field
+  // this modal can edit (status/priority/dueDate via a select or date
+  // input, comments via saveComment) is committed to the server
+  // immediately on change, so there's never a case of unsaved free text
+  // sitting in localIssue that this could stomp on.
+  useEffect(() => {
+    if (!issue) return;
+    setLocalIssue((prev: any) =>
+      !prev || issue.version > prev.version ? issue : prev,
+    );
+  }, [issue]);
+
   // Subtasks
   const [subtasks, setSubtasks] = useState<any[]>([]);
   const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
@@ -268,6 +285,11 @@ const IssueModel = ({ issue, isOpen, onClose }: any) => {
 
       setLocalIssue(res.data);
       setCommentText("");
+      // Without this, the board/backlog page's own issues array never
+      // learns about the new comment — so closing this modal and
+      // reopening the same issue (a fresh mount, seeded from that array)
+      // would show it with the comment missing again.
+      bumpIssuesVersion();
     } catch (err) {
       console.error("Failed to save comment", err);
     } finally {

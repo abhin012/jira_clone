@@ -84,6 +84,20 @@ const KanbanBoard = () => {
     fetchIssues();
   }, [selectedProject?.id, issuesVersion]);
 
+  // Keep the open issue modal's `issue` prop pointing at current data as
+  // the board refetches (e.g. after a realtime event from someone else's
+  // comment/edit) — otherwise a modal left open across that refresh would
+  // keep rendering whatever snapshot it had when it was first clicked
+  // open, since IssueModel only re-seeds its own local state from a
+  // genuinely different `issue` object.
+  useEffect(() => {
+    if (!selectedIssue) return;
+    const fresh = issues.find((i) => i.id === selectedIssue.id);
+    if (fresh && fresh !== selectedIssue) {
+      setSelectedIssue(fresh);
+    }
+  }, [issues]);
+
   /* =====================
      Drag handlers
   ===================== */
