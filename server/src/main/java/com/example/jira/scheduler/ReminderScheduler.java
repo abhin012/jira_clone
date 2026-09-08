@@ -26,7 +26,7 @@ public class ReminderScheduler {
         this.notificationPublisher = notificationPublisher;
     }
 
-    @Scheduled(cron = "0 */10 * * * *")
+    @Scheduled(cron = "0 * * * * *")
     public void sendDueDateReminders() {
         Instant now = Instant.now();
 
@@ -35,7 +35,7 @@ public class ReminderScheduler {
         fireTier(now.plus(90, ChronoUnit.MINUTES), Issue::isReminder90mSent, Issue::setReminder90mSent, "is due in 90 minutes.");
     }
 
-    private static final long MIN_INTERVAL_MS = 5 * 60 * 1000;
+    private static final long MIN_INTERVAL_MS = 60 * 1000;
     private final AtomicLong lastRunEpochMs = new AtomicLong(0);
 
     @Async
