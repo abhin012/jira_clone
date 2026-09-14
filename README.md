@@ -2,21 +2,44 @@
 
 A full-stack project management tool inspired by Jira — Kanban board, backlog, sprints, subtasks with dependencies, time tracking, file attachments, notifications, and live multi-user collaboration.
 
+**Live demo:** https://jira-clone-abhin-das.vercel.app/
+**Backend:** https://jira-sim.onrender.com/
+
+---
+
 ## Tech Stack
 
-**Client** — Next.js 16 (React 19, App Router), TypeScript, Tailwind CSS, Radix UI, `@dnd-kit` for drag-and-drop, `@stomp/stompjs` + SockJS for realtime.
+**Frontend:** Next.js 16 (React 19, App Router), TypeScript, Tailwind CSS, Radix UI, `@dnd-kit` (drag-and-drop), `@stomp/stompjs` + SockJS (realtime)
+**Backend:** Spring Boot 3, Java 17, MongoDB, Spring Security + JWT, Spring WebSocket (STOMP)
+**Email:** Brevo (transactional email API)
+**Deployment:** Vercel (frontend), Render (backend), MongoDB Atlas (database)
 
-**Server** — Spring Boot 3 (Java 17), MongoDB, Spring Security + JWT, Spring WebSocket (STOMP), Brevo for transactional email.
+---
 
 ## Features
 
-- **Projects & boards** — Kanban board and backlog view, drag-and-drop status changes, sprints.
-- **Issues** — subtasks (inherit project/sprint from parent), cross-issue dependencies with circular-dependency detection, comments, due dates.
-- **Time tracking** — per-issue and per-sprint work logs with an audit trail.
-- **Attachments** — type/size-restricted file uploads per issue.
-- **Notifications** — in-app + email, deduplicated per event, with tiered due-date reminders (24h / 10h / 90min).
-- **Realtime** — live issue updates and project presence via WebSocket, so every viewer stays in sync.
-- **Auth & profile** — JWT login, email-change verification (OTP or link), password rules, account deactivation.
+### Kanban Board & Backlog
+Drag-and-drop issue board (To Do / In Progress / Done) alongside a dedicated backlog view. Projects contain sprints; only one sprint can be active at a time, and completing a sprint automatically moves its unfinished issues back to the backlog.
+
+### Issues, Subtasks & Dependencies
+Issues can have subtasks, which inherit their parent's project and sprint and can't diverge from it — a parent can't be marked Done until every subtask is. Cross-issue dependencies are supported with cycle detection, so a task can never depend on something that (even transitively) depends on it. Completing a blocking task automatically clears it from the dependent issue's blocked-by list and notifies whoever was waiting.
+
+### Time Tracking
+Per-issue work logs (date, duration, description) roll up into per-issue and per-sprint totals. Edits and deletions are written to an audit log, and only the issue's assignee or the project owner can modify entries.
+
+### Real-Time Collaboration
+STOMP over WebSocket keeps every viewer of a project in sync — issue creation, updates, moves, and comments appear live for everyone on that board, alongside a presence indicator showing who else is currently viewing.
+
+### Notifications
+In-app and email notifications for assignment, status changes, blocking-task completion, and due dates — deduplicated per event so nothing notifies twice. Due-date reminders fire in three tiers (24h / 10h / 90min before deadline) via a scheduled sweep.
+
+### Attachments
+File uploads per issue, restricted to PDF/PNG/JPG/DOCX under 10MB, validated by both declared type and actual file signature — not just the extension.
+
+### Auth & Profile Security
+JWT-based login, an email-change flow requiring OTP or a confirmation link, password strength rules, and account deactivation that preserves historical activity for auditing.
+
+---
 
 ## Project Structure
 
@@ -27,7 +50,7 @@ server/   Spring Boot backend
 
 ## Getting Started
 
-### Server
+### Backend
 
 ```bash
 cd server
@@ -38,7 +61,7 @@ cp src/main/resources/application.properties.example src/main/resources/applicat
 
 Runs on `http://localhost:8080`.
 
-### Client
+### Frontend
 
 ```bash
 cd client
@@ -47,6 +70,16 @@ npm run dev
 ```
 
 Runs on `http://localhost:3000`. Set `NEXT_PUBLIC_API_BASE_URL` in a `.env.local` file if the server isn't on `localhost:8080`.
+
+---
+
+## Notes
+
+- The backend runs on Render's free tier, which spins down after ~15 minutes of inactivity — scheduled jobs can't run while it's asleep. Due-date reminders use a request-triggered fallback sweep that piggybacks on ordinary API traffic, so they stay roughly on schedule regardless of whether the cron tick itself got skipped while the server slept.
+- Email (notifications and email-change verification) requires a Brevo API key. Without one, the email-change flow falls back to showing the OTP/confirmation link directly on screen instead of sending it.
+- Due dates are stored as proper UTC instants, converted using the browser's own timezone at input time — a due date set by a user in any timezone fires its reminders at the correct moment for them, not the server's.
+
+---
 
 ## Deployment
 
