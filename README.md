@@ -54,9 +54,9 @@ The server ships with a `Dockerfile` (builds and runs the Spring Boot jar). The 
 
 ## Certifications
 
-<table>
+<table width="100%">
   <tr>
-    <td style="padding-right: 16px;"><img src="images/elevanceskills-Full-Stack-Web-Development-Internship-Certificate.png" width="380" alt="Full Stack Web Development Internship Certificate"></td>
-    <td style="padding-left: 16px;"><img src="images/elevanceskills-Full-Stack-Web-Development-Training-Certificate.png" width="380" alt="Full Stack Web Development Training Certificate"></td>
+    <td width="50%" style="padding-right: 16px;"><img src="images/elevanceskills-Full-Stack-Web-Development-Internship-Certificate.png" style="width:100%;" alt="Full Stack Web Development Internship Certificate"></td>
+    <td width="50%" style="padding-left: 16px;"><img src="images/elevanceskills-Full-Stack-Web-Development-Training-Certificate.png" style="width:100%;" alt="Full Stack Web Development Training Certificate"></td>
   </tr>
 </table>
