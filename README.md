@@ -10,8 +10,11 @@ A full-stack project management tool inspired by Jira — Kanban board, backlog,
 ## Tech Stack
 
 **Frontend:** Next.js 16 (React 19, App Router), TypeScript, Tailwind CSS, Radix UI, `@dnd-kit` (drag-and-drop), `@stomp/stompjs` + SockJS (realtime)
+
 **Backend:** Spring Boot 3, Java 17, MongoDB, Spring Security + JWT, Spring WebSocket (STOMP)
+
 **Email:** Brevo (transactional email API)
+
 **Deployment:** Vercel (frontend), Render (backend), MongoDB Atlas (database)
 
 ---
