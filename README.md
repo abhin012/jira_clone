@@ -51,3 +51,8 @@ Runs on `http://localhost:3000`. Set `NEXT_PUBLIC_API_BASE_URL` in a `.env.local
 ## Deployment
 
 The server ships with a `Dockerfile` (builds and runs the Spring Boot jar). The client deploys as a standard Next.js app (e.g. Vercel).
+
+## Certifications
+
+<img src="images/elevanceskills-Full-Stack-Web-Development-Internship-Certificate.png" width="400" alt="Full Stack Web Development Internship Certificate">
+<img src="images/elevanceskills-Full-Stack-Web-Development-Training-Certificate.png" width="400" alt="Full Stack Web Development Training Certificate">
